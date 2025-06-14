@@ -1,10 +1,13 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AiOutlineDashboard } from 'react-icons/ai';
 import { FiSettings }       from 'react-icons/fi';
 import { IoMdStats }        from 'react-icons/io';
 import { BiLogOut }         from 'react-icons/bi';
-import { TbLayoutSidebarLeftCollapseFilled, TbLayoutSidebarLeftExpand } from 'react-icons/tb';
+
+interface SidebarProps {
+  isOpen?: boolean;
+  toggleSidebar: () => void;
+}
 
 const menuItems = [
   { name: 'Ana Sayfa', icon: <AiOutlineDashboard />, link: '/' },
@@ -13,32 +16,27 @@ const menuItems = [
   { name: 'Çıkış Yap',    icon: <BiLogOut />, link: '/logout' }
 ];
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+
+export default function Sidebar({ isOpen }: SidebarProps) {
 
   return (
     <motion.div
-      animate={{ width: isOpen ? 270 : 60 }}
+      animate={{ width: isOpen ? 250 : 80 }}
       transition={{ damping: 20 }}
-      className="h-screen bg-gray-200 flex flex-col"
+      className="h-screen border-r border-gray-800 bg-black text-white flex flex-col p-4"
     >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="px-10 py-3 w-10 self-end focus:outline-none text-2xl"
-      >
-        {isOpen ? <TbLayoutSidebarLeftCollapseFilled /> : <TbLayoutSidebarLeftExpand />}
-      </button>
-
+      {/* Menü Öğeleri */}
       <nav className="flex-1">
         {menuItems.map((item, idx) => (
           <motion.div
             key={idx}
-            className="flex items-center bg-gray-400 rounded-e-lg my-2 cursor-pointer p-4 hover:bg-gray-500 transition-colors"
-            whileHover={{ scale: 1.05 }}
+            className={`flex items-center ${
+              isOpen ? 'justify-start' : 'justify-center'
+            } p-3 my-2 rounded-lg bg-gray-800 hover:bg-gray-600 transition-all cursor-pointer`}
             onClick={() => window.location.href = item.link}
           >
             <div className="text-xl">{item.icon}</div>
-            {isOpen && <span className="ml-4">{item.name}</span>}
+            {isOpen && <span className="ml-4 text-sm">{item.name}</span>}
           </motion.div>
         ))}
       </nav>

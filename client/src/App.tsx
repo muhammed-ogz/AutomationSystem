@@ -4,7 +4,7 @@ import Login from './pages/Auth/Login'
 import RegisterUser from './pages/Auth/RegisterUser'
 import DefaultLayout from './layout/DefaultLayout'
 import Home from './pages/Home/Home'
-import ListProduct from './pages/Home/Product/ListProduct'
+import ListProduct from './pages/Product/ListProduct'
 
 function App() {
 

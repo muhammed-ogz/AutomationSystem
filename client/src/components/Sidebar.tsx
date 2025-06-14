@@ -7,10 +7,10 @@ import { BiLogOut }         from 'react-icons/bi';
 import { TbLayoutSidebarLeftCollapseFilled, TbLayoutSidebarLeftExpand } from 'react-icons/tb';
 
 const menuItems = [
-  { name: 'Dashboard', icon: <AiOutlineDashboard /> },
-  { name: 'Analytics', icon: <IoMdStats /> },
-  { name: 'Settings',  icon: <FiSettings /> },
-  { name: 'Logout',    icon: <BiLogOut /> }
+  { name: 'Ana Sayfa', icon: <AiOutlineDashboard />, link: '/' },
+  { name: 'Ürünler', icon: <IoMdStats />, link: '/products' },
+  { name: 'Ayarlar',  icon: <FiSettings />, link: '/settings' },
+  { name: 'Çıkış Yap',    icon: <BiLogOut />, link: '/logout' }
 ];
 
 export default function Sidebar() {
@@ -33,8 +33,9 @@ export default function Sidebar() {
         {menuItems.map((item, idx) => (
           <motion.div
             key={idx}
-            className="flex items-center cursor-pointer p-4 hover:bg-gray-700"
+            className="flex items-center bg-gray-400 rounded-e-lg my-2 cursor-pointer p-4 hover:bg-gray-500 transition-colors"
             whileHover={{ scale: 1.05 }}
+            onClick={() => window.location.href = item.link}
           >
             <div className="text-xl">{item.icon}</div>
             {isOpen && <span className="ml-4">{item.name}</span>}

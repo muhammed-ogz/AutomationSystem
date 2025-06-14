@@ -4,12 +4,12 @@ import Login from './pages/Auth/Login'
 import RegisterUser from './pages/Auth/RegisterUser'
 import DefaultLayout from './layout/DefaultLayout'
 import Home from './pages/Home/Home'
+import ListProduct from './pages/Home/Product/ListProduct'
 
 function App() {
 
   return (
     <>
-      {/* Default Layout içerisinde bir yönlendirme yapılacak */}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterUser />} />
@@ -18,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<RegisterUser />} />
+          <Route path="/products" element={<ListProduct />} />
         </Routes>
       </DefaultLayout>
     </>

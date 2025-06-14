@@ -41,16 +41,21 @@ const Home: React.FC = () => {
           <div className="bg-blue-100 p-4 rounded-lg shadow-md flex items-center gap-4">
             <FaUser className="text-blue-500 text-4xl" />
             <div>
-              <p className="text-xl font-semibold">1,245</p>
-              <p className="text-gray-600">Aktif Kullanıcı</p>
-                <button className="bg-blue-400 p-2 mt-2 rounded-lg text-gray-600 text-sm hover:bg-blue-500 transition-colors duration-300">Kullanıcıları görüntüle</button>
+              <p className="text-xl font-semibold">235</p>
+              <p className="text-gray-600">Kayıtlı Ürün</p>
+                <button 
+                  onClick={() => window.location.href = "/products"}
+                  className="bg-blue-400 p-2 mt-2 rounded-lg text-gray-600 text-sm hover:bg-blue-500 transition-colors duration-300"
+                >
+                  Ürün Listesini Görüntüle
+                </button>
             </div>
           </div>
           <div className="bg-green-100 p-4 rounded-lg shadow-md flex items-center gap-4">
             <FaShoppingCart className="text-green-500 text-4xl" />
             <div>
               <p className="text-xl font-semibold">8,120</p>
-              <p className="text-gray-600">Toplam Satış</p>
+              <p className="text-gray-600">Toplam Satış Adeti</p>
               <button className="bg-green-400 p-2 mt-2 rounded-lg text-gray-600 text-sm hover:bg-green-500">Satışları görüntüle</button>
             </div>
           </div>

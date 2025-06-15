@@ -7,6 +7,7 @@ import Home from "./pages/Home/Home";
 import AddProduct from "./pages/Product/AddProduct";
 import EditProduct from "./pages/Product/EditProduct";
 import ListProduct from "./pages/Product/ListProduct";
+import Statistics from "./pages/Statistics/Statistics";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/products" element={<ListProduct />} />
           <Route path="/products/edit/:id" element={<EditProduct />} />
           <Route path="/products/add" element={<AddProduct />} />
+          <Route path="/statistics" element={<Statistics />} />
         </Routes>
       </DefaultLayout>
     </>

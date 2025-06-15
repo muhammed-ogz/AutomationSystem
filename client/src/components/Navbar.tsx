@@ -4,20 +4,17 @@ import { IoIosNotifications } from "react-icons/io"
 import { IoLogOut } from "react-icons/io5"
 import { TbLayoutSidebarLeftCollapseFilled, TbLayoutSidebarLeftExpand } from "react-icons/tb";
 
-interface NavbarProps {
-  toggleSidebar?: () => void; 
-}
-const Navbar = ({ toggleSidebar }: NavbarProps) => {
+const Navbar = () => {
   return (
     <section id='navbar' className="border-b border-gray-800">
       <div className='flex py-4 px-10'>
         <h1 className='text-2xl'>Automation System</h1>
-        <button
+        {/* <button
         onClick={toggleSidebar}
         className="text-xl ml-10 p-2 rounded-lg"
         >
         {toggleSidebar ? <TbLayoutSidebarLeftCollapseFilled /> : <TbLayoutSidebarLeftExpand />}
-        </button>
+        </button> */}
         <div className='ml-auto'>
         <ul className='flex space-x-2'>
           <li><a href='#' className='flex bg-gray-800 px-2 py-2 text-sm rounded-lg hover:bg-cyan-400'><FaHome className="mt-1 mr-2"/>Anasayfa</a></li>

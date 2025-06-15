@@ -1,5 +1,18 @@
-import { FaChartBar, FaUser, FaShoppingCart } from "react-icons/fa";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Label, Brush, Legend, type TooltipProps } from "recharts";
+import { motion } from "framer-motion";
+import { FaChartBar, FaShoppingCart, FaUser } from "react-icons/fa";
+import {
+  Brush,
+  CartesianGrid,
+  Label,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  type TooltipProps,
+} from "recharts";
 
 const data = [
   { month: "Ocak", sales: 4000 },
@@ -31,52 +44,111 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 const Home: React.FC = () => {
   return (
-    <>
-      <section id="home" className="m-10 rounded-lg text-gray-300 bg-gray-950 min-h-screen">
-        <div className="p-10">
-        <div className="justify-center items-center text-center mb-8">
+    <section
+      id="home"
+      className="m-10 rounded-lg text-gray-300 bg-gray-950 min-h-screen"
+    >
+      <motion.div
+        className="p-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {/* Başlık */}
+        <motion.div
+          className="justify-center items-center text-center mb-8"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
           <h1 className="text-4xl font-semibold mb-5">Hoş Geldiniz!</h1>
-          <p className="text-gray-400 text-xl font-semibold">Envanter yönetimi ve stok takip programı</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4">
-            <FaUser className="text-blue-400 text-4xl" />
-            <div>
-              <p className="text-2xl font-semibold">235</p>
-              <p className="text-gray-400">Kayıtlı Ürün</p>
-              <button
-                onClick={() => window.location.href = "/products"}
-                className="bg-blue-600 p-2 mt-2 rounded-lg text-white text-sm hover:bg-blue-500 transition-colors duration-300"
-              >
-                Ürün Listesini Görüntüle
-              </button>
-            </div>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4">
-            <FaShoppingCart className="text-green-400 text-4xl" />
-            <div>
-              <p className="text-2xl font-semibold">8,120</p>
-              <p className="text-gray-400">Toplam Satış Adeti</p>
-              <button className="bg-green-600 p-2 mt-2 rounded-lg text-white text-sm hover:bg-green-500">
-                Satışları görüntüle
-              </button>
-            </div>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4">
-            <FaChartBar className="text-yellow-400 text-4xl" />
-            <div>
-              <p className="text-2xl font-semibold">₺234,567</p>
-              <p className="text-gray-400">Gelir</p>
-              <button className="bg-yellow-600 p-2 mt-2 rounded-lg text-white text-sm hover:bg-yellow-500">
-                Geliri görüntüle
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gray-800 text-gray-300 shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Satış ve Gider İstatistikleri</h2>
+          <p className="text-gray-400 text-xl font-semibold">
+            Envanter yönetimi ve stok takip programı
+          </p>
+        </motion.div>
+
+        {/* İstatistik Kartları */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.15 } },
+          }}
+        >
+          {[
+            {
+              icon: <FaUser className="text-blue-400 text-4xl" />,
+              value: "235",
+              label: "Kayıtlı Ürün",
+              btnText: "Ürün Listesini Görüntüle",
+              btnAction: () => (window.location.href = "/products"),
+            },
+            {
+              icon: <FaShoppingCart className="text-green-400 text-4xl" />,
+              value: "8,120",
+              label: "Toplam Satış Adeti",
+              btnText: "Satışları görüntüle",
+              btnAction: () => {},
+              btnColor: "green",
+            },
+            {
+              icon: <FaChartBar className="text-yellow-400 text-4xl" />,
+              value: "₺234,567",
+              label: "Gelir",
+              btnText: "Geliri görüntüle",
+              btnAction: () => {},
+              btnColor: "yellow",
+            },
+          ].map((item, idx) => (
+            <motion.div
+              key={idx}
+              className="bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4 group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: idx * 0.2 }}
+              whileHover={{ scale: 1.03 }}
+            >
+              {item.icon}
+              <div>
+                <p className="text-2xl font-semibold group-hover:text-white transition-colors">
+                  {item.value}
+                </p>
+                <p className="text-gray-400">{item.label}</p>
+                <button
+                  onClick={item.btnAction}
+                  className={`mt-2 p-2 rounded-lg text-white text-sm transition-colors duration-300 bg-${
+                    item.btnColor || "blue"
+                  }-600 hover:bg-${item.btnColor || "blue"}-500`}
+                >
+                  {item.btnText}
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Grafik Bölümü */}
+        <motion.div
+          className="bg-gray-800 text-gray-300 shadow-md rounded-lg p-6"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.h2
+            className="text-2xl font-semibold mb-4"
+            initial={{ x: -10, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            Satış ve Gider İstatistikleri
+          </motion.h2>
           <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={data} margin={{ top: 20, right: 40, left: 0, bottom: 20 }}>
+            <LineChart
+              data={data}
+              margin={{ top: 20, right: 40, left: 0, bottom: 20 }}
+            >
               <CartesianGrid stroke="#444" strokeDasharray="5 5" />
               <XAxis
                 dataKey="month"
@@ -94,7 +166,11 @@ const Home: React.FC = () => {
                 tickLine={{ stroke: "#ccc" }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ color: "#ccc" }} />
+              <Legend
+                verticalAlign="top"
+                height={36}
+                wrapperStyle={{ color: "#ccc" }}
+              />
               <Line
                 type="monotone"
                 dataKey="sales"
@@ -103,6 +179,7 @@ const Home: React.FC = () => {
                 strokeWidth={3}
                 dot={{ r: 5, stroke: "#8884d8", fill: "#8884d8" }}
                 activeDot={{ r: 8, stroke: "#8884d8", fill: "#8884d8" }}
+                animationDuration={1500}
               />
               <Brush
                 dataKey="month"
@@ -113,11 +190,10 @@ const Home: React.FC = () => {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
-  </>
-);
-}
+  );
+};
 
 export default Home;

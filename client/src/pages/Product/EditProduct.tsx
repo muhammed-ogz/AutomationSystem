@@ -33,7 +33,7 @@ const EditProduct = () => {
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          🛠️ Ürün Ekle
+          🛠️ Ürünleri Düzenle
         </motion.h1>
 
         {/* Form Fields */}
@@ -64,7 +64,7 @@ const EditProduct = () => {
               id="product-name"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              placeholder="Mesela: Akıllı Telefon"
+              placeholder="Örneğin : Akıllı Telefon"
               className="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:animate-pulse transition-all"
             />
           </motion.div>

@@ -1,13 +1,14 @@
-import { Route, Routes } from 'react-router-dom'
-import './index.css'
-import Login from './pages/Auth/Login'
-import RegisterUser from './pages/Auth/RegisterUser'
-import DefaultLayout from './layout/DefaultLayout'
-import Home from './pages/Home/Home'
-import ListProduct from './pages/Product/ListProduct'
+import { Route, Routes } from "react-router-dom";
+import "./index.css";
+import DefaultLayout from "./layout/DefaultLayout";
+import Login from "./pages/Auth/Login";
+import RegisterUser from "./pages/Auth/RegisterUser";
+import Home from "./pages/Home/Home";
+import AddProduct from "./pages/Product/AddProduct";
+import EditProduct from "./pages/Product/EditProduct";
+import ListProduct from "./pages/Product/ListProduct";
 
 function App() {
-
   return (
     <>
       <Routes>
@@ -19,10 +20,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<RegisterUser />} />
           <Route path="/products" element={<ListProduct />} />
+          <Route path="/products/edit/:id" element={<EditProduct />} />
+          <Route path="/products/add" element={<AddProduct />} />
         </Routes>
       </DefaultLayout>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

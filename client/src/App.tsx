@@ -8,6 +8,8 @@ import AddProduct from "./pages/Product/AddProduct";
 import EditProduct from "./pages/Product/EditProduct";
 import ListProduct from "./pages/Product/ListProduct";
 import Statistics from "./pages/Statistics/Statistics";
+import Revenue from "./pages/Revenue/Revenue";
+import Settings from "./pages/Settings/Settings";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="/products/edit/:id" element={<EditProduct />} />
           <Route path="/products/add" element={<AddProduct />} />
           <Route path="/statistics" element={<Statistics />} />
+          <Route path="/revenue" element={<Revenue />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </DefaultLayout>
     </>

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { FaChartBar, FaShoppingCart, FaUser } from "react-icons/fa";
+import { AiFillProduct } from "react-icons/ai";
+import { FaChartBar, FaShoppingCart } from "react-icons/fa";
 import {
   Brush,
   CartesianGrid,
@@ -22,6 +23,7 @@ const data = [
   { month: "Mayıs", sales: 6000 },
   { month: "Haziran", sales: 7000 },
 ];
+
 const currencyFormatter = (value: any) => `${value.toLocaleString("tr-TR")}₺`;
 
 type CustomTooltipProps = TooltipProps<number, string>;
@@ -40,6 +42,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     );
   }
   return null;
+};
+
+const buttonStyles = {
+  blue: "bg-blue-600 hover:bg-blue-500",
+  green: "bg-green-600 hover:bg-green-500", 
+  yellow: "bg-yellow-600 hover:bg-yellow-500"
 };
 
 const Home: React.FC = () => {
@@ -79,27 +87,28 @@ const Home: React.FC = () => {
         >
           {[
             {
-              icon: <FaUser className="text-blue-400 text-4xl" />,
+              icon: <AiFillProduct className="text-blue-400 text-4xl" />,
               value: "235",
               label: "Kayıtlı Ürün",
               btnText: "Ürün Listesini Görüntüle",
               btnAction: () => (window.location.href = "/products"),
+              btnColor: "blue" as keyof typeof buttonStyles,
             },
             {
-              icon: <FaShoppingCart className="text-green-400 text-4xl" />,
+              icon: <FaChartBar className="text-green-400 text-4xl" />,
               value: "8,120",
               label: "Toplam Satış Adeti",
-              btnText: "Satışları görüntüle",
-              btnAction: () => {},
-              btnColor: "green",
+              btnText: "Satışları İstatistiklerini Görüntüle",
+              btnAction: () => (window.location.href = "/statistics"),
+              btnColor: "green" as keyof typeof buttonStyles,
             },
             {
-              icon: <FaChartBar className="text-yellow-400 text-4xl" />,
+              icon: <FaShoppingCart className="text-yellow-400 text-4xl" />,
               value: "₺234,567",
               label: "Gelir",
-              btnText: "Geliri görüntüle",
-              btnAction: () => {},
-              btnColor: "yellow",
+              btnText: "Gelir Detaylarını Görüntüle",
+              btnAction: () => (window.location.href = "/revenue"),
+              btnColor: "yellow" as keyof typeof buttonStyles,
             },
           ].map((item, idx) => (
             <motion.div
@@ -118,9 +127,7 @@ const Home: React.FC = () => {
                 <p className="text-gray-400">{item.label}</p>
                 <button
                   onClick={item.btnAction}
-                  className={`mt-2 p-2 rounded-lg text-white text-sm transition-colors duration-300 bg-${
-                    item.btnColor || "blue"
-                  }-600 hover:bg-${item.btnColor || "blue"}-500`}
+                  className={`mt-2 p-2 rounded-lg text-white text-sm transition-colors duration-300 ${buttonStyles[item.btnColor]}`}
                 >
                   {item.btnText}
                 </button>
@@ -142,7 +149,7 @@ const Home: React.FC = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            Satış ve Gider İstatistikleri
+            Satış İstatistikleri Özet Görünümü
           </motion.h2>
           <ResponsiveContainer width="100%" height={350}>
             <LineChart

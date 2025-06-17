@@ -138,16 +138,16 @@ const Navbar = () => {
                 </div>
                 
                 <div className="py-2">
-                  <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                  <a href="/profile" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
                     <FaUserCircle className="mr-3" />
-                    Profil Ayarları
+                    Profil Bilgileri
                   </a>
-                  <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                  <a href="/account" className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
                     <FaCog className="mr-3" />
                     Hesap Ayarları
                   </a>
                   <hr className="border-gray-700 my-2" />
-                  <a href="#" className="flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors duration-200">
+                  <a href="/logout" className="flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors duration-200">
                     <IoLogOut className="mr-3" />
                     Çıkış Yap
                   </a>

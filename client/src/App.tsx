@@ -10,6 +10,7 @@ import ListProduct from "./pages/Product/ListProduct";
 import Statistics from "./pages/Statistics/Statistics";
 import Revenue from "./pages/Revenue/Revenue";
 import Settings from "./pages/Settings/Settings";
+import Profile from "./pages/Profile/Profile";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/revenue" element={<Revenue />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </DefaultLayout>
     </>

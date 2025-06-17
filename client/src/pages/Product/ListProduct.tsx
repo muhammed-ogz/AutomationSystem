@@ -11,7 +11,7 @@ import {
   MdTrendingDown,
   MdWarning
 } from "react-icons/md";
-import { FaBox, FaEye } from "react-icons/fa";
+import { FaBox} from "react-icons/fa";
 
 // Type Definitions
 interface Product {
@@ -185,7 +185,6 @@ const ListProduct: React.FC = () => {
 
   const ProductCard: React.FC<ProductCardProps> = ({
     product,
-    onEdit,
     onDelete,
   }) => (
     <motion.div

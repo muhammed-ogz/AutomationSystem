@@ -11,6 +11,7 @@ import Statistics from "./pages/Statistics/Statistics";
 import Revenue from "./pages/Revenue/Revenue";
 import Settings from "./pages/Settings/Settings";
 import Profile from "./pages/Profile/Profile";
+import Report from "./pages/Report/Report";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/revenue" element={<Revenue />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/report" element={<Report />} />
         </Routes>
       </DefaultLayout>
     </>

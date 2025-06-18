@@ -322,14 +322,25 @@ const ListProduct: React.FC = () => {
               </p>
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
-          >
-            <MdAdd className="text-xl" />
-            <span>Yeni Ürün</span>
-          </motion.button>
+            <div className="flex items-center space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
+              onClick={() => (window.location.href = '/report')}
+            >
+              <MdAdd className="text-xl" />
+              <span>Rapor Çıkart</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
+            >
+              <MdAdd className="text-xl" />
+              <span>Yeni Ürün</span>
+            </motion.button>
+            </div>
         </motion.div>
 
         {/* Filters */}

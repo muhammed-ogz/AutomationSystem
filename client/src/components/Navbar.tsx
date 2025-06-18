@@ -50,11 +50,8 @@ const Navbar = () => {
         <div className='flex items-center space-x-4'>
           {/* Navigasyon Menüsü */}
           <nav className="hidden lg:flex space-x-2">
-            <a href='#' className='flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-cyan-600 transition-colors duration-200 text-gray-300 hover:text-white'>
+            <a href='/' className='flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-cyan-600 transition-colors duration-200 text-gray-300 hover:text-white'>
               <FaHome className="mr-2"/>Anasayfa
-            </a>
-            <a href='#' className='flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-orange-600 transition-colors duration-200 text-gray-300 hover:text-white'>
-              <HiDocumentReport className="mr-2"/>Raporlar
             </a>
           </nav>
 

@@ -13,10 +13,9 @@ const Navbar: React.FC = () => {
     name: "Ahmet Şahin",
     email: "ahmet.sahin@company.com",
     role: "Sistem Yöneticisi",
-    avatar: "AS" // İlk harfler
+    avatar: "AS" 
   };
-
-  // Örnek bildirimler
+  
   const notifications = [
     { id: 1, message: "Yeni stok uyarısı", time: "5 dk önce", unread: true },
     { id: 2, message: "Rapor hazır", time: "15 dk önce", unread: true },

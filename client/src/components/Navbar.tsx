@@ -4,7 +4,7 @@ import { HiDocumentReport } from "react-icons/hi";
 import { IoLogOut } from "react-icons/io5";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 

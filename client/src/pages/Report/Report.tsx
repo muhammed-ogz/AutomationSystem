@@ -10,8 +10,7 @@ import {
   HiOutlineDocument,
   HiOutlineEye,
   HiChevronDown,
-  HiOutlineAdjustments,
-  HiOutlineSparkles
+  HiOutlineAdjustments
 } from 'react-icons/hi';
 
 interface ReportConfig {
@@ -116,10 +115,6 @@ export default function Report() {
               <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text ">
                 Rapor Oluşturma
               </h1>
-              <div className="flex items-center mt-2">
-                <HiOutlineSparkles className="w-4 h-4 text-yellow-400 mr-2 animate-spin" />
-                <span className="text-sm text-gray-400">Gelişmiş AI Destekli</span>
-              </div>
             </div>
           </div>
           <p className="text-gray-300 text-lg leading-relaxed relative z-10">

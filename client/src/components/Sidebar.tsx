@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { BiLogOut } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
@@ -26,10 +27,21 @@ const menuItems = [
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedItem, setExpandedItem] = useState(null);
+  const [expandedItem, setExpandedItem] = useState<number | null>(null);
+  const navigate = useNavigate();
 
-  const toggleSubMenu = (idx: any) => {
+  const toggleSubMenu = (idx: number) => {
     setExpandedItem(expandedItem === idx ? null : idx);
+  };
+
+  const handleNavigation = (link: string) => {
+    if (link === "/logout") {
+      // Logout işlemi - buraya logout logic'i ekleyebilirsiniz
+      console.log("Logout işlemi");
+      navigate("/login");
+    } else {
+      navigate(link);
+    }
   };
 
   return (
@@ -56,7 +68,7 @@ export default function Sidebar() {
                 onClick={() =>
                   item.subItems
                     ? toggleSubMenu(idx)
-                    : (window.location.href = item.link)
+                    : handleNavigation(item.link!)
                 }
               >
                 <div className="text-xl">{item.icon}</div>
@@ -69,7 +81,7 @@ export default function Sidebar() {
                     <button
                       key={subIdx}
                       className="text-sm flex items-center bg-gray-700 hover:bg-gray-500 transition-all cursor-pointer text-gray-300 hover:text-white p-2 rounded-lg"
-                      onClick={() => (window.location.href = subItem.link)}
+                      onClick={() => handleNavigation(subItem.link)}
                     >
                       {subItem.icon}
                       <span className="ml-2 text-sm">{subItem.name}</span>

@@ -1,13 +1,23 @@
 {
+  "name": "api-server",
+  "version": "1.0.0",
+  "description": "API server for the application",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node dist/index.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "mongodb": "^6.17.0",
     "mongoose": "^8.16.0",
     "path": "^0.12.7",
-    "pino": "^9.7.0"
+    "pino": "^9.7.0",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3"
+    "@types/node": "^24.0.3",
+    "typescript": "^5.8.3"
   }
 }

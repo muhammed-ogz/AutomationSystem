@@ -1,15 +1,11 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 
 import { connect } from "mongoose";
 import path from "path";
 import pino from "pino";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // controllers are connected here
 

@@ -1,4 +1,4 @@
-import { Route, Routes, Outlet } from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import "./index.css";
 import DefaultLayout from "./layout/DefaultLayout";
 import Login from "./pages/Auth/Login";
@@ -7,11 +7,12 @@ import Home from "./pages/Home/Home";
 import AddProduct from "./pages/Product/AddProduct";
 import EditProduct from "./pages/Product/EditProduct";
 import ListProduct from "./pages/Product/ListProduct";
-import Statistics from "./pages/Statistics/Statistics";
-import Revenue from "./pages/Revenue/Revenue";
-import Settings from "./pages/Settings/Settings";
+import EditProfile from "./pages/Profile/EditProfile";
 import Profile from "./pages/Profile/Profile";
 import Report from "./pages/Report/Report";
+import Revenue from "./pages/Revenue/Revenue";
+import Settings from "./pages/Settings/Settings";
+import Statistics from "./pages/Statistics/Statistics";
 
 // Layout wrapper component
 const LayoutWrapper = () => {
@@ -28,7 +29,7 @@ function App() {
       {/* Login ve Register doğrudan render edilir */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterUser />} />
-      
+
       {/* DefaultLayout içine sarılı rotalar */}
       <Route path="/" element={<LayoutWrapper />}>
         <Route index element={<Home />} />
@@ -39,6 +40,7 @@ function App() {
         <Route path="revenue" element={<Revenue />} />
         <Route path="settings" element={<Settings />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="account" element={<EditProfile />} />
         <Route path="report" element={<Report />} />
       </Route>
     </Routes>

@@ -4,11 +4,11 @@ const Profile = () => {
       <section id="profile">
         <div className="m-10 bg-gray-950 rounded-lg shadow-lg p-6">
           <h1 className="text-2xl font-semibold text-gray-200 mb-6">
-            Profilinizi Düzenleyin
+            Profilinizi Görüntüleyin
           </h1>
           <div className="mb-8 p-6 bg-gray-800/30 rounded-2xl border border-gray-750/50 backdrop-blur-sm">
             <h2 className="text-2xl font-semibold text-gray-200 mb-6">
-              Kullanıcı Bilgileri
+              Firma bilgileri
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col">
@@ -16,7 +16,7 @@ const Profile = () => {
                   htmlFor="username"
                   className="text-sm font-medium text-gray-300 mb-1"
                 >
-                  Kullanıcı Adı
+                  Firma Adı
                 </label>
                 <input
                   type="text"
@@ -65,24 +65,32 @@ const Profile = () => {
               </div>
             </div>
             <div className="text-gray-500 text-sm mt-4">
-                <h3 className="text-xl mb-4">Detaylı Bilgiler : </h3>
-                <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                        Yukarıdaki bilgiler size ait hassas bilgilerdir. Lütfen bu bilgileri kimseyle paylaşmayın.
-                    </li>
-                    <li>
-                        Yetki düzeyiniz, sistemdeki erişim haklarınızı belirler. Yöneticiler tüm sistem ayarlarına erişebilirken, normal kullanıcılar sadece kendi verilerine erişebilir.
-                    </li>
-                    <li>
-                        IP adresiniz, sistemdeki oturum açma işlemlerinizin güvenliğini artırmak için kullanılır. Bu bilgi, hesabınızın güvenliğini sağlamak amacıyla saklanır.
-                    </li>
-                    <li>
-                        E-posta adresiniz, sistemle ilgili bildirimler ve şifre sıfırlama işlemleri için kullanılır. Lütfen geçerli bir e-posta adresi girin.
-                    </li>
-                    <li>
-                        Kullanıcı adınız, sistemdeki kimliğinizi temsil eder. Bu bilgi, diğer kullanıcılarla etkileşimlerinizde kullanılır.
-                    </li>
-                </ul>
+              <h3 className="text-xl mb-4">Detaylı Bilgiler : </h3>
+              <ul className="list-disc pl-5 space-y-2">
+                <li>
+                  Yukarıdaki bilgiler size ait hassas bilgilerdir. Lütfen bu
+                  bilgileri kimseyle paylaşmayın.
+                </li>
+                <li>
+                  Yetki düzeyiniz, sistemdeki erişim haklarınızı belirler.
+                  Yöneticiler tüm sistem ayarlarına erişebilirken, normal
+                  kullanıcılar sadece kendi verilerine erişebilir.
+                </li>
+                <li>
+                  IP adresiniz, sistemdeki oturum açma işlemlerinizin
+                  güvenliğini artırmak için kullanılır. Bu bilgi, hesabınızın
+                  güvenliğini sağlamak amacıyla saklanır.
+                </li>
+                <li>
+                  E-posta adresiniz, sistemle ilgili bildirimler ve şifre
+                  sıfırlama işlemleri için kullanılır. Lütfen geçerli bir
+                  e-posta adresi girin.
+                </li>
+                <li>
+                  Kullanıcı adınız, sistemdeki kimliğinizi temsil eder. Bu
+                  bilgi, diğer kullanıcılarla etkileşimlerinizde kullanılır.
+                </li>
+              </ul>
             </div>
           </div>
         </div>

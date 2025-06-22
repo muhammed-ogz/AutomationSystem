@@ -1,17 +1,17 @@
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useState, type JSX } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MdOutlineDelete, 
-  MdOutlineEditNote, 
+import { FaBox } from "react-icons/fa";
+import {
   MdAdd,
-  MdSearch,
   MdFilterList,
   MdInventory,
-  MdTrendingUp,
+  MdOutlineDelete,
+  MdOutlineEditNote,
+  MdSearch,
   MdTrendingDown,
-  MdWarning
+  MdTrendingUp,
+  MdWarning,
 } from "react-icons/md";
-import { FaBox} from "react-icons/fa";
 
 // Type Definitions
 interface Product {
@@ -22,8 +22,8 @@ interface Product {
   stock: number;
   category: string;
   image: string;
-  status: 'in-stock' | 'low-stock' | 'out-of-stock';
-  trend: 'up' | 'down' | 'stable';
+  status: "in-stock" | "low-stock" | "out-of-stock";
+  trend: "up" | "down" | "stable";
 }
 
 interface ProductCardProps {
@@ -36,8 +36,8 @@ interface ProductCardProps {
 interface FilterState {
   search: string;
   category: string;
-  sortBy: 'name' | 'price' | 'stock';
-  sortOrder: 'asc' | 'desc';
+  sortBy: "name" | "price" | "stock";
+  sortOrder: "asc" | "desc";
 }
 
 // Mock Data
@@ -51,7 +51,7 @@ const products: Product[] = [
     category: "Laptop",
     image: "https://via.placeholder.com/150/667eea/ffffff?text=MacBook",
     status: "low-stock",
-    trend: "up"
+    trend: "up",
   },
   {
     id: 2,
@@ -62,7 +62,7 @@ const products: Product[] = [
     category: "Telefon",
     image: "https://via.placeholder.com/150/f093fb/ffffff?text=iPhone",
     status: "in-stock",
-    trend: "up"
+    trend: "up",
   },
   {
     id: 3,
@@ -73,7 +73,7 @@ const products: Product[] = [
     category: "Kulaklık",
     image: "https://via.placeholder.com/150/4facfe/ffffff?text=AirPods",
     status: "out-of-stock",
-    trend: "down"
+    trend: "down",
   },
   {
     id: 4,
@@ -84,7 +84,7 @@ const products: Product[] = [
     category: "Tablet",
     image: "https://via.placeholder.com/150/43e97b/ffffff?text=iPad",
     status: "in-stock",
-    trend: "stable"
+    trend: "stable",
   },
   {
     id: 5,
@@ -95,16 +95,16 @@ const products: Product[] = [
     category: "Saat",
     image: "https://via.placeholder.com/150/fbbf24/ffffff?text=Watch",
     status: "low-stock",
-    trend: "up"
-  }
+    trend: "up",
+  },
 ];
 
 const ListProduct: React.FC = () => {
   const [filter, setFilter] = useState<FilterState>({
-    search: '',
-    category: '',
-    sortBy: 'name',
-    sortOrder: 'asc'
+    search: "",
+    category: "",
+    sortBy: "name",
+    sortOrder: "asc",
   });
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
@@ -123,37 +123,37 @@ const ListProduct: React.FC = () => {
     // window.location.href = `/products/${id}`;
   };
 
-  const getStatusColor = (status: Product['status']): string => {
+  const getStatusColor = (status: Product["status"]): string => {
     switch (status) {
-      case 'in-stock':
-        return 'from-emerald-500/20 to-green-500/20 border-emerald-500/30';
-      case 'low-stock':
-        return 'from-amber-500/20 to-orange-500/20 border-amber-500/30';
-      case 'out-of-stock':
-        return 'from-red-500/20 to-rose-500/20 border-red-500/30';
+      case "in-stock":
+        return "from-emerald-500/20 to-green-500/20 border-emerald-500/30";
+      case "low-stock":
+        return "from-amber-500/20 to-orange-500/20 border-amber-500/30";
+      case "out-of-stock":
+        return "from-red-500/20 to-rose-500/20 border-red-500/30";
       default:
-        return 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
+        return "from-gray-500/20 to-gray-600/20 border-gray-500/30";
     }
   };
 
-  const getStatusText = (status: Product['status']): string => {
+  const getStatusText = (status: Product["status"]): string => {
     switch (status) {
-      case 'in-stock':
-        return 'Stokta';
-      case 'low-stock':
-        return 'Az Stok';
-      case 'out-of-stock':
-        return 'Tükendi';
+      case "in-stock":
+        return "Stokta";
+      case "low-stock":
+        return "Az Stok";
+      case "out-of-stock":
+        return "Tükendi";
       default:
-        return 'Bilinmiyor';
+        return "Bilinmiyor";
     }
   };
 
-  const getTrendIcon = (trend: Product['trend']): JSX.Element => {
+  const getTrendIcon = (trend: Product["trend"]): JSX.Element => {
     switch (trend) {
-      case 'up':
+      case "up":
         return <MdTrendingUp className="text-green-400" />;
-      case 'down':
+      case "down":
         return <MdTrendingDown className="text-red-400" />;
       default:
         return <div className="w-4 h-4 bg-gray-400 rounded-full"></div>;
@@ -161,56 +161,60 @@ const ListProduct: React.FC = () => {
   };
 
   const filteredProducts = products
-    .filter(product =>
-      product.name.toLowerCase().includes(filter.search.toLowerCase()) &&
-      (filter.category === '' || product.category === filter.category)
+    .filter(
+      (product) =>
+        product.name.toLowerCase().includes(filter.search.toLowerCase()) &&
+        (filter.category === "" || product.category === filter.category)
     )
     .sort((a, b) => {
       let comparison = 0;
       switch (filter.sortBy) {
-        case 'name':
+        case "name":
           comparison = a.name.localeCompare(b.name);
           break;
-        case 'price':
+        case "price":
           comparison = a.priceNumber - b.priceNumber;
           break;
-        case 'stock':
+        case "stock":
           comparison = a.stock - b.stock;
           break;
       }
-      return filter.sortOrder === 'asc' ? comparison : -comparison;
+      return filter.sortOrder === "asc" ? comparison : -comparison;
     });
 
-  const categories = Array.from(new Set(products.map(p => p.category)));
+  const categories = Array.from(new Set(products.map((p) => p.category)));
 
-  const ProductCard: React.FC<ProductCardProps> = ({
-    product,
-    onDelete,
-  }) => (
+  const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete }) => (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: -20 }}
       whileHover={{ y: -5 }}
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${getStatusColor(product.status)} 
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${getStatusColor(
+        product.status
+      )} 
         backdrop-blur-sm border-2 p-6 transition-all duration-300 hover:shadow-2xl 
         hover:shadow-purple-500/10 group`}
     >
       {/* Status Badge */}
       <div className="absolute top-4 right-4 flex items-center space-x-2">
-        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-          product.status === 'in-stock' ? 'bg-emerald-500/20 text-emerald-300' :
-          product.status === 'low-stock' ? 'bg-amber-500/20 text-amber-300' :
-          'bg-red-500/20 text-red-300'
-        }`}>
+        <div
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            product.status === "in-stock"
+              ? "bg-emerald-500/20 text-emerald-300"
+              : product.status === "low-stock"
+              ? "bg-amber-500/20 text-amber-300"
+              : "bg-red-500/20 text-red-300"
+          }`}
+        >
           {getStatusText(product.status)}
         </div>
         {getTrendIcon(product.trend)}
       </div>
 
       {/* Low Stock Warning */}
-      {product.status === 'low-stock' && (
+      {product.status === "low-stock" && (
         <div className="absolute top-4 left-4">
           <MdWarning className="text-amber-400 text-xl animate-pulse" />
         </div>
@@ -253,11 +257,15 @@ const ListProduct: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <MdInventory className="text-gray-400" />
-              <span className={`font-semibold ${
-                product.stock > 10 ? 'text-green-400' :
-                product.stock > 0 ? 'text-amber-400' :
-                'text-red-400'
-              }`}>
+              <span
+                className={`font-semibold ${
+                  product.stock > 10
+                    ? "text-green-400"
+                    : product.stock > 0
+                    ? "text-amber-400"
+                    : "text-red-400"
+                }`}
+              >
                 {product.stock} adet
               </span>
             </div>
@@ -267,10 +275,13 @@ const ListProduct: React.FC = () => {
           <div className="w-full bg-gray-700/50 rounded-full h-2 mb-4">
             <div
               className={`h-2 rounded-full transition-all duration-500 ${
-                product.stock > 20 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                product.stock > 10 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-                product.stock > 0 ? 'bg-gradient-to-r from-orange-500 to-red-500' :
-                'bg-gradient-to-r from-red-500 to-red-700'
+                product.stock > 20
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                  : product.stock > 10
+                  ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                  : product.stock > 0
+                  ? "bg-gradient-to-r from-orange-500 to-red-500"
+                  : "bg-gradient-to-r from-red-500 to-red-700"
               }`}
               style={{ width: `${Math.min((product.stock / 50) * 100, 100)}%` }}
             />
@@ -283,7 +294,9 @@ const ListProduct: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => (window.location.href = `/products/edit/${product.id}`)}
+          onClick={() =>
+            (window.location.href = `/products/edit/${product.id}`)
+          }
           className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition-all duration-200 backdrop-blur-sm border border-purple-500/30"
         >
           <MdOutlineEditNote className="text-lg" />
@@ -318,16 +331,17 @@ const ListProduct: React.FC = () => {
                 Ürün Listesi
               </h1>
               <p className="text-gray-400 mt-1">
-                Toplam {products.length} ürün • {filteredProducts.length} görüntüleniyor
+                Toplam {products.length} ürün • {filteredProducts.length}{" "}
+                görüntüleniyor
               </p>
             </div>
           </div>
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
-              onClick={() => (window.location.href = '/report')}
+              onClick={() => (window.location.href = "/report")}
             >
               <MdAdd className="text-xl" />
               <span>Rapor Çıkart</span>
@@ -335,12 +349,13 @@ const ListProduct: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => (window.location.href = "/products/add")}
               className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
             >
               <MdAdd className="text-xl" />
               <span>Yeni Ürün</span>
             </motion.button>
-            </div>
+          </div>
         </motion.div>
 
         {/* Filters */}
@@ -359,7 +374,7 @@ const ListProduct: React.FC = () => {
                 placeholder="Ürün ara..."
                 value={filter.search}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFilter(prev => ({ ...prev, search: e.target.value }))
+                  setFilter((prev) => ({ ...prev, search: e.target.value }))
                 }
                 className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
               />
@@ -382,7 +397,7 @@ const ListProduct: React.FC = () => {
             {showFilters && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/50"
               >
@@ -390,20 +405,28 @@ const ListProduct: React.FC = () => {
                   <select
                     value={filter.category}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setFilter(prev => ({ ...prev, category: e.target.value }))
+                      setFilter((prev) => ({
+                        ...prev,
+                        category: e.target.value,
+                      }))
                     }
                     className="px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     <option value="">Tüm Kategoriler</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
                     ))}
                   </select>
-                  
+
                   <select
                     value={filter.sortBy}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setFilter(prev => ({ ...prev, sortBy: e.target.value as FilterState['sortBy'] }))
+                      setFilter((prev) => ({
+                        ...prev,
+                        sortBy: e.target.value as FilterState["sortBy"],
+                      }))
                     }
                     className="px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
@@ -411,11 +434,14 @@ const ListProduct: React.FC = () => {
                     <option value="price">Fiyata Göre</option>
                     <option value="stock">Stoka Göre</option>
                   </select>
-                  
+
                   <select
                     value={filter.sortOrder}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setFilter(prev => ({ ...prev, sortOrder: e.target.value as FilterState['sortOrder'] }))
+                      setFilter((prev) => ({
+                        ...prev,
+                        sortOrder: e.target.value as FilterState["sortOrder"],
+                      }))
                     }
                     className="px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
@@ -429,10 +455,7 @@ const ListProduct: React.FC = () => {
         </motion.div>
 
         {/* Products Grid */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-        >
+        <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AnimatePresence>
             {filteredProducts.map((product, index) => (
               <motion.div

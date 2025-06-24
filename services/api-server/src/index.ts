@@ -9,8 +9,11 @@ import pino from "pino";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // controllers are connected here
 
+import { UserController } from "./controllers/UserController";
+
 //middlewares are connected here
 const app = express();
+const router = express.Router();
 const logger = pino();
 const PORT = 5000;
 
@@ -20,6 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use("/public", express.static(path.join(__dirname, "../public")));
+
+const userController = new UserController(logger);
+
+userController.registerRoutes(router);
+app.use(router);
 
 (async function () {
   try {

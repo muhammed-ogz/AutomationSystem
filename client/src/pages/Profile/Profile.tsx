@@ -78,8 +78,9 @@ const Profile = () => {
                 </li>
                 <li>
                   IP adresiniz, sistemdeki oturum açma işlemlerinizin
-                  güvenliğini artırmak için kullanılır. Bu bilgi, hesabınızın
-                  güvenliğini sağlamak amacıyla saklanır.
+                  güvenliğini artırmak ve veritabanı erişim ayarları için
+                  kullanılır. Bu bilgi, hesabınızın güvenliğini sağlamak
+                  amacıyla saklanır.
                 </li>
                 <li>
                   E-posta adresiniz, sistemle ilgili bildirimler ve şifre

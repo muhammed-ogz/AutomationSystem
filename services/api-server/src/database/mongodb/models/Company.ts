@@ -1,20 +1,36 @@
-import { Document, model, Schema } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 
-export interface Users extends Document {
-  email: string;
-  phoneNumber?: string;
+interface Company extends Document {
+  name: string;
+  databaseName: string; //firma için kullanılacak veritabanı adı
+  createdAt: Date;
+  avatar: string; // Base64 veya URL formatında SVG
   password: string;
-  companyId: string;
-  companyName: string;
-  avatar: string;
   smsNotification: boolean;
   emailNotification: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  email: string;
+  phoneNumber: string;
 }
 
-const UsersSchema = new Schema<Users>(
+const companySchema = new Schema<Company>(
   {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      minlength: [2, "Şirket adı en az 2 karakter olmalıdır"],
+      maxlength: [100, "Şirket adı en fazla 100 karakter olabilir"],
+    },
+    avatar: {
+      type: String,
+      required: true,
+      // URL validasyonunu kaldırdık çünkü base64 SVG'ler de kabul ediyoruz
+    },
+    databaseName: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     email: {
       required: true,
       type: String,
@@ -42,24 +58,6 @@ const UsersSchema = new Schema<Users>(
         message: "Geçersiz telefon numarası formatı",
       },
     },
-    companyId: {
-      required: true,
-      type: String,
-      unique: true,
-      trim: true,
-    },
-    avatar: {
-      type: String,
-      required: true,
-      // URL validasyonunu kaldırdık çünkü base64 SVG'ler de kabul ediyoruz
-    },
-    companyName: {
-      required: true,
-      type: String,
-      trim: true,
-      minlength: [2, "Şirket adı en az 2 karakter olmalıdır"],
-      maxlength: [100, "Şirket adı en fazla 100 karakter olabilir"],
-    },
     password: {
       required: true,
       type: String,
@@ -73,6 +71,10 @@ const UsersSchema = new Schema<Users>(
       type: Boolean,
       default: false,
     },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
@@ -80,11 +82,10 @@ const UsersSchema = new Schema<Users>(
   }
 );
 
-UsersSchema.methods.toJSON = function () {
-  const userObject = this.toObject();
-  delete userObject.password;
-  return userObject;
+companySchema.methods.toJSON = function () {
+  const companyObj = this.toObject();
+  delete companyObj.password; // Şifreyi JSON çıktısından kaldır
+  return companyObj;
 };
 
-const Users = model<Users>("Users", UsersSchema);
-export default Users;
+export default model<Company>("Company", companySchema);

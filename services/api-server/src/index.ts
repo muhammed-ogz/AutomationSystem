@@ -1,48 +1,150 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-
-import { connect } from "mongoose";
+import mongoose, { connect } from "mongoose";
 import path from "path";
 import pino from "pino";
 
+// Services
+import CompanyController from "./controllers/CompanyController";
+import { closeAllConnections } from "./services/databaseService";
+
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-// controllers are connected here
 
-import { UserController } from "./controllers/UserController";
-
-//middlewares are connected here
 const app = express();
-const router = express.Router();
 const logger = pino();
 const PORT = 5000;
+const router = express.Router();
 
+// Express ayarları
 app.set("x-powered-by", false);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+// Middlewares
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+      "http://localhost:5000",
+    ],
+    credentials: true,
+  })
+);
+
+// Static files
 app.use("/public", express.static(path.join(__dirname, "../public")));
-
-const userController = new UserController(logger);
-
-userController.registerRoutes(router);
 app.use(router);
 
-(async function () {
+// Health check endpoint
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Endpoint bulunamadı",
+    path: req.originalUrl,
+  });
+});
+
+// Global error handler
+app.use((err: any, _req: express.Request, res: express.Response) => {
+  logger.error(`Global error: ${err.message}`);
+
+  res.status(err.status || 500).json({
+    success: false,
+    message:
+      process.env.NODE_ENV === "production" ? "Bir hata oluştu" : err.message,
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+  });
+});
+
+const companyController = new CompanyController(logger);
+
+companyController.registeredRoutes(router);
+// Graceful shutdown
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`${signal} received. Starting graceful shutdown...`);
+
   try {
-    logger.info("Connecting to MongoDB...");
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is not defined in .env file");
-    }
-    await connect(process.env.MONGODB_URI);
-    logger.info("Connected to MongoDB successfully");
-    app.listen(PORT, "0.0.0.0", () => {
-      logger.info(`Server is running on http://0.0.0.0:${PORT}`);
-    });
-  } catch (err: any) {
-    logger.error(
-      `An error occurred during application startup : ${err.message || err}.`
+    // Tüm şirket veritabanı bağlantılarını kapat
+    await closeAllConnections();
+
+    // Ana veritabanı bağlantısını kapat
+    await mongoose.connection?.close();
+
+    logger.info("Graceful shutdown completed");
+    process.exit(0);
+  } catch (error: any) {
+    logger.error(`Error during shutdown: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+// Process event listeners
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Unhandled promise rejection
+process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+  gracefulShutdown("unhandledRejection");
+});
+
+// Uncaught exception
+process.on("uncaughtException", (error: Error) => {
+  logger.error(`Uncaught Exception: ${error.message}`);
+  gracefulShutdown("uncaughtException");
+});
+
+// Ana uygulama başlatma fonksiyonu
+(async function startApplication() {
+  try {
+    logger.info("Starting application...");
+
+    // Environment variables kontrolü
+    const requiredEnvVars = ["MONGODB_URI"];
+    const missingEnvVars = requiredEnvVars.filter(
+      (envVar) => !process.env[envVar]
     );
+
+    if (missingEnvVars.length > 0) {
+      throw new Error(
+        `Missing required environment variables: ${missingEnvVars.join(", ")}`
+      );
+    }
+
+    // MongoDB'ye bağlan
+    logger.info("Connecting to MongoDB...");
+
+    await connect(process.env.MONGODB_URI!, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      bufferCommands: false,
+    });
+
+    logger.info("Connected to MongoDB successfully");
+
+    // Express sunucusunu başlat
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      logger.info(`🚀 Server is running on http://0.0.0.0:${PORT}`);
+      logger.info(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.info(`📁 API Documentation: http://0.0.0.0:${PORT}/health`);
+    });
+
+    // Server timeout ayarları
+    server.keepAliveTimeout = 120000;
+    server.headersTimeout = 120000;
+  } catch (err: any) {
+    logger.error(`Application startup failed: ${err.message || err}`);
+    process.exit(1);
   }
 })();

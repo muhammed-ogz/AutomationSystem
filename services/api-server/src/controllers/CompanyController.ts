@@ -25,7 +25,7 @@ export class CompanyController {
       if (!name || !email) {
         return res.status(400).json({
           success: false,
-          message: "Şirket adı ve email adresi zorunludur",
+          message: "Company name and email required",
         });
       }
 
@@ -37,7 +37,7 @@ export class CompanyController {
       if (existingCompany) {
         return res.status(409).json({
           success: false,
-          message: "Bu şirket adı veya email adresi zaten kullanılıyor",
+          message: "This company name or email address is being used",
         });
       }
 
@@ -103,11 +103,11 @@ export class CompanyController {
 
       await createCompanyDatabase(dbName, company._id.toString());
 
-      this.logger.info(`Yeni şirket oluşturuldu: ${name} (DB: ${dbName})`);
+      this.logger.info(`New company created: ${name} (DB: ${dbName})`);
 
       res.status(201).json({
         success: true,
-        message: "Şirket başarıyla oluşturuldu",
+        message: "Company create process is succesfully",
         data: {
           id: company._id,
           name: company.name,
@@ -118,10 +118,10 @@ export class CompanyController {
         },
       });
     } catch (error: any) {
-      this.logger.error(`Şirket oluşturma hatası: ${error.message}`);
+      this.logger.error(`Company creating error: ${error.message}`);
       res.status(500).json({
         success: false,
-        message: "Şirket oluşturulurken bir hata oluştu",
+        message: "Company creating error",
         error:
           process.env.NODE_ENV === "development" ? error.message : undefined,
       });
@@ -137,15 +137,15 @@ export class CompanyController {
 
       res.status(200).json({
         success: true,
-        message: "Şirketler başarıyla listelendi",
+        message: "Companies successfully listed",
         data: companies,
         count: companies.length,
       });
     } catch (error: any) {
-      this.logger.error(`Şirketleri listeleme hatası: ${error.message}`);
+      this.logger.error(`Error listing companies: ${error.message}`);
       res.status(500).json({
         success: false,
-        message: "Şirketler listelenirken bir hata oluştu",
+        message: "An error occurred while listing companies",
       });
     }
   }
@@ -160,20 +160,20 @@ export class CompanyController {
       if (!company) {
         return res.status(404).json({
           success: false,
-          message: "Şirket bulunamadı",
+          message: "Company not found",
         });
       }
 
       res.status(200).json({
         success: true,
-        message: "Şirket başarıyla bulundu",
+        message: "The company was successfully found.",
         data: company,
       });
     } catch (error: any) {
-      this.logger.error(`Şirket getirme hatası: ${error.message}`);
+      this.logger.error(`Failure to bring company: ${error.message}`);
       res.status(500).json({
         success: false,
-        message: "Şirket bilgileri alınırken bir hata oluştu",
+        message: "An error occurred while retrieving company information",
       });
     }
   }
@@ -197,22 +197,22 @@ export class CompanyController {
       if (!company) {
         return res.status(404).json({
           success: false,
-          message: "Şirket bulunamadı",
+          message: "Company not found",
         });
       }
 
-      logger.info(`Şirket güncellendi: ${company.name}`);
+      logger.info(`Company updated: ${company.name}`);
 
       res.status(200).json({
         success: true,
-        message: "Şirket başarıyla güncellendi",
+        message: "Company create process is successfully",
         data: company,
       });
     } catch (error: any) {
-      this.logger.error(`Şirket güncelleme hatası: ${error.message}`);
+      this.logger.error(`Company update error: ${error.message}`);
       res.status(500).json({
         success: false,
-        message: "Şirket güncellenirken bir hata oluştu",
+        message: "An error occurred while updating the company",
       });
     }
   }
@@ -231,21 +231,21 @@ export class CompanyController {
       if (!company) {
         return res.status(404).json({
           success: false,
-          message: "Şirket bulunamadı",
+          message: "Company not found",
         });
       }
 
-      logger.info(`Şirket pasife alındı: ${company.name}`);
+      logger.info(`Company deactivated: ${company.name}`);
 
       res.status(200).json({
         success: true,
-        message: "Şirket başarıyla pasife alındı",
+        message: "Company deactivate process is succesfully",
       });
     } catch (error: any) {
-      this.logger.error(`Şirket pasife alma hatası: ${error.message}`);
+      this.logger.error(`Company deactivate process error:  ${error.message}`);
       res.status(500).json({
         success: false,
-        message: "Şirket pasife alınırken bir hata oluştu",
+        message: "An error occurred while inactivating the company",
       });
     }
   }
@@ -262,30 +262,32 @@ export class CompanyController {
       if (!company) {
         return res.status(404).json({
           success: false,
-          message: "Şirket bulunamadı",
+          message: "Company not found",
         });
       }
 
       if (!(company as any).isActive) {
         return res.status(403).json({
           success: false,
-          message: "Şirket aktif değil",
+          message: "Company is don't activate",
         });
       }
 
       res.status(200).json({
         success: true,
-        message: "Veritabanı bilgileri alındı",
+        message: "Database information received",
         data: {
           companyName: company.name,
           databaseName: company.databaseName,
         },
       });
     } catch (error: any) {
-      this.logger.error(`Veritabanı bilgisi alma hatası: ${error.message}`);
+      this.logger.error(
+        `Database information retrieval error: ${error.message}`
+      );
       res.status(500).json({
         success: false,
-        message: "Veritabanı bilgileri alınırken bir hata oluştu",
+        message: "An error occurred while retrieving database information",
       });
     }
   }

@@ -135,9 +135,9 @@ process.on("uncaughtException", (error: Error) => {
 
     // Express sunucusunu başlat
     const server = app.listen(PORT, "0.0.0.0", () => {
-      logger.info(`🚀 Server is running on http://0.0.0.0:${PORT}`);
-      logger.info(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-      logger.info(`📁 API Documentation: http://0.0.0.0:${PORT}/health`);
+      logger.info(`Server is running on http://0.0.0.0:${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.info(`API Documentation: http://0.0.0.0:${PORT}/health`);
     });
 
     // Server timeout ayarları

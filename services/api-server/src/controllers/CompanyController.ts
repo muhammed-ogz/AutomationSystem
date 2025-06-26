@@ -1,5 +1,9 @@
+import bcrypt from "bcryptjs";
 import { Request, Response, Router } from "express";
+import jwt from "jsonwebtoken";
 import pino, { Logger } from "pino";
+import { v4 as uuidv4 } from "uuid";
+import { INTERNAL_SERVER_API_ERROR } from "../api";
 import Company from "../database/mongodb/models/Company";
 import { createCompanyDatabase } from "../services/databaseService";
 
@@ -18,7 +22,7 @@ export class CompanyController {
   // Yeni şirket oluştur
   async createCompany(req: Request, res: Response) {
     try {
-      const { name, email, phone, address, taxNumber, industry, description } =
+      const { name, email, password, phone, address, taxNumber, industry } =
         req.body;
 
       // Validasyon
@@ -29,7 +33,6 @@ export class CompanyController {
         });
       }
 
-      // Aynı isimde şirket var mı kontrol et
       const existingCompany = await Company.findOne({
         $or: [{ name }, { email }],
       });
@@ -41,10 +44,27 @@ export class CompanyController {
         });
       }
 
-      // Şirket için benzersiz veritabanı adı oluştur
-      const dbName = `company_${name
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "_")}_${Date.now()}`;
+      if (!password || password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password is required and must be at least 6 characters",
+        });
+      }
+      if (
+        !password.match(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*\(\)])[a-zA-Z\d!@#$%^&*\(\)]{6,}$/
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must contain at least one uppercase letter, one lowercase letter, and one digit",
+        });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const uuid = uuidv4();
+      const companyId = uuid.replace(/-/g, "").slice(0, 16);
+      const dbName = `company_${companyId}`;
 
       // Şirket adından avatar oluştur (baş harfler)
       const generateAvatar = (companyName: string): string => {
@@ -86,16 +106,16 @@ export class CompanyController {
 
       // Yeni şirket oluştur
       const company = new Company({
+        companyId: companyId,
         name,
         email,
         phoneNumber: phone || undefined, // Model'de phoneNumber olarak tanımlı
         address,
         taxNumber,
         industry,
-        description,
         databaseName: dbName,
         avatar,
-        password: "defaultPassword123", // Bu kısmı gerçek projede hash'lemelisin
+        password: hashedPassword,
         createdAt: new Date(),
       });
 
@@ -112,6 +132,9 @@ export class CompanyController {
           id: company._id,
           name: company.name,
           email: company.email,
+          phoneNumber: company.phoneNumber,
+          address: company.address,
+          taxNumber: company.taxNumber,
           avatar: company.avatar,
           databaseName: company.databaseName,
           createdAt: company.createdAt,
@@ -289,6 +312,60 @@ export class CompanyController {
         success: false,
         message: "An error occurred while retrieving database information",
       });
+    }
+  }
+  async companyLogin(req: Request, res: Response) {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and password are required",
+        });
+      }
+      // Şirketi email ile bul
+      const company = await Company.findOne({ email });
+
+      if (!company) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Company not found. Please check your email address or password.",
+        });
+      }
+
+      const isMatch = await bcrypt.compare(password, company.password);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid password. Please try again.",
+        });
+      }
+
+      const token = jwt.sign(
+        {
+          email: company.email,
+          name: company.name,
+          companyId: company.companyId,
+        },
+        { expiresIn: "2h" }
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: {
+          token,
+          companyId: company.companyId,
+          name: company.name,
+          email: company.email,
+          avatar: company.avatar,
+        },
+      });
+    } catch (error: any) {
+      this.logger.error(`Company login error: ${error.message}`);
+      res.status(500).json({ message: INTERNAL_SERVER_API_ERROR }).end();
     }
   }
 }

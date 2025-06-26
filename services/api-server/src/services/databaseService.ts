@@ -1,6 +1,6 @@
 import { Connection, createConnection } from "mongoose";
 import pino from "pino";
-
+import { ColletionSchemas } from "../database/mongodb/schemas/ColletionSchemas";
 const logger = pino();
 
 interface CompanyConnection {
@@ -29,7 +29,7 @@ export class DatabaseService {
         throw new Error("MONGODB_URI bulunamadı");
       }
 
-      // Şirket veritabanına bağlan (createConnection kullan, connect değil)
+      // Şirket veritabanına bağlan
       const companyDbUri = `${baseUri}/${databaseName}`;
       const companyConnection = createConnection(companyDbUri, {
         maxPoolSize: 10,
@@ -74,73 +74,23 @@ export class DatabaseService {
     companyId: string
   ): Promise<void> {
     try {
-      // Users koleksiyonu
+      for (const [collectionName, fields] of Object.entries(ColletionSchemas)) {
+        // Koleksiyonu oluştur
+        await connection.createCollection(collectionName);
 
-      // Products koleksiyonu
-
-      // Orders koleksiyonu
-
-      // Customers koleksiyonu
-
-      // Settings koleksiyonu
-
-      // Koleksiyonları oluştur
-      await connection.createCollection("users");
-      await connection.createCollection("products");
-      await connection.createCollection("orders");
-      await connection.createCollection("customers");
-      await connection.createCollection("settings");
-
-      // İndeksleri oluştur
-      await connection
-        .collection("users")
-        .createIndex({ email: 1 }, { unique: true });
-      await connection.collection("users").createIndex({ companyId: 1 });
-
-      await connection
-        .collection("products")
-        .createIndex({ sku: 1 }, { unique: true, sparse: true });
-      await connection.collection("products").createIndex({ companyId: 1 });
-
-      await connection
-        .collection("orders")
-        .createIndex({ orderNumber: 1 }, { unique: true });
-      await connection.collection("orders").createIndex({ companyId: 1 });
-
-      await connection
-        .collection("customers")
-        .createIndex({ email: 1, companyId: 1 }, { unique: true });
-
-      await connection
-        .collection("settings")
-        .createIndex({ key: 1, companyId: 1 }, { unique: true });
-
-      // Varsayılan ayarları ekle
-      const defaultSettings = [
-        {
-          key: "company_currency",
-          value: "TRY",
-          description: "Şirket para birimi",
-          companyId,
-          createdAt: new Date(),
-        },
-        {
-          key: "order_prefix",
-          value: "ORD",
-          description: "Sipariş numarası ön eki",
-          companyId,
-          createdAt: new Date(),
-        },
-        {
-          key: "timezone",
-          value: "Europe/Istanbul",
-          description: "Şirket saat dilimi",
-          companyId,
-          createdAt: new Date(),
-        },
-      ];
-
-      await connection.collection("settings").insertMany(defaultSettings);
+        // İndeksleri oluştur
+        for (const field of fields as Array<any>) {
+          if (field.unique) {
+            const indexConfig: any = { [field.key]: 1 };
+            await connection
+              .collection(collectionName)
+              .createIndex(indexConfig, {
+                unique: true,
+                sparse: field.sparse || false,
+              });
+          }
+        }
+      }
 
       logger.info(`Temel koleksiyonlar oluşturuldu: ${companyId}`);
     } catch (error: any) {
@@ -233,7 +183,6 @@ export class DatabaseService {
 // Singleton instance
 const databaseService = new DatabaseService();
 
-// Export functions
 export const createCompanyDatabase = (
   databaseName: string,
   companyId: string

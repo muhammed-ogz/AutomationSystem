@@ -31,10 +31,7 @@ const companySchema = new Schema<Company>(
     },
     taxNumber: {
       type: String,
-      required: true,
-      unique: true,
-      minlength: [10, "Vergi numarası en az 10 karakter olmalıdır"],
-      maxlength: [10, "Vergi numarası 10 karakterden fazla olamaz"],
+      required: [true, "Vergi numarası zorunludur"],
     },
     address: {
       country: {
@@ -90,6 +87,7 @@ const companySchema = new Schema<Company>(
     },
     phoneNumber: {
       type: String,
+      required: true,
       trim: true,
       sparse: true,
       unique: true,

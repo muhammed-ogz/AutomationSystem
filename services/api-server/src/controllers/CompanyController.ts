@@ -22,14 +22,18 @@ export class CompanyController {
   // Yeni şirket oluştur
   async createCompany(req: Request, res: Response) {
     try {
-      const { name, email, password, phone, address, taxNumber, industry } =
-        req.body;
-
+      const { name, email, password, phone, address, taxNumber } = req.body;
       // Validasyon
       if (!name || !email) {
         return res.status(400).json({
           success: false,
           message: "Company name and email required",
+        });
+      }
+      if (!taxNumber) {
+        return res.status(400).json({
+          success: false,
+          message: "Tax number is required",
         });
       }
 
@@ -52,7 +56,7 @@ export class CompanyController {
       }
       if (
         !password.match(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*\(\)])[a-zA-Z\d!@#$%^&*\(\)]{6,}$/
+          /^(?=.*[a-zıöüşçğ])(?=.*[A-ZİÖÜŞÇĞ])(?=.*\d)(?=.*[!@#$%^&*\(\)\-_\+=\[\]{};:'",.<>?/])[a-zA-ZıİöÖüÜşŞçÇğĞ\d!@#$%^&*\(\)\-_\+=\[\]{};:'",.<>?/]{6,}$/
         )
       ) {
         return res.status(400).json({
@@ -109,10 +113,9 @@ export class CompanyController {
         companyId: companyId,
         name,
         email,
-        phoneNumber: phone || undefined, // Model'de phoneNumber olarak tanımlı
+        phoneNumber: phone,
         address,
         taxNumber,
-        industry,
         databaseName: dbName,
         avatar,
         password: hashedPassword,

@@ -400,7 +400,6 @@ export class CompanyController {
         { expiresIn: "24h" } // Token süresini artırdım
       );
 
-      // Başarılı giriş yanıtı
       res.status(200).json({
         success: true,
         message: "Giriş başarılı",
@@ -437,12 +436,9 @@ export class CompanyController {
   // Düzeltilmiş connectToCompanyDatabase fonksiyonu
   private async connectToCompanyDatabase(dbName: string): Promise<void> {
     try {
-      // Connection string'i oluştur
       const connectionString = `${process.env.MONGODB_COMP_DB}/${dbName}${process.env.MONGODB_OPTIONS}`;
 
       console.log(`Attempting to connect to: ${connectionString}`);
-
-      // MongoDB bağlantısını oluştur
       const companyConnection = mongoose.createConnection(connectionString);
 
       // Bağlantı event listeners

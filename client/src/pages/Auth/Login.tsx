@@ -136,47 +136,84 @@ const Login = () => {
         body: JSON.stringify(requestData),
       });
 
-      const data = await res.json();
-      console.log("Login response:", data);
+      const responseData = await res.json();
+      console.log("Login response:", responseData);
+      console.log("Response keys:", Object.keys(responseData));
+      console.log("Response data field:", responseData.data);
+      console.log("Response data type:", typeof responseData.data);
 
-      if (!res.ok) {
-        // HTTP status code hatası
-        const errorMessage = data.message || `HTTP Error: ${res.status}`;
-        toast.error(errorMessage);
-        console.error("Login failed with status:", res.status, data);
+      // HTTP durum kodlarına göre hata yönetimi
+      if (res.status === 404) {
+        toast.error("Firma bulunamadı. Lütfen e-mail adresinizi kontrol edin.");
         setIsLoading(false);
         return;
       }
 
-      if (data.success) {
-        // Başarılı giriş
-        toast.success(data.message || "Giriş başarılı!");
+      if (res.status === 401) {
+        toast.error("Geçersiz şifre. Lütfen şifrenizi kontrol edin.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (res.status === 400) {
+        toast.error(responseData.message || "Geçersiz istek.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (res.status === 500) {
+        toast.error(responseData.message || "Sunucu hatası oluştu.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const errorMessage =
+          responseData.message || `HTTP Error: ${res.status}`;
+        toast.error(errorMessage);
+        console.error("Login failed with status:", res.status, responseData);
+        setIsLoading(false);
+        return;
+      }
+
+      // Başarılı giriş kontrolü
+      if (res.status === 200 && responseData.success) {
+        toast.success("Giriş başarılı!");
+
+        // Backend'den gelen data objesi içindeki bilgileri al
+        const { data } = responseData;
+        const { token, companyId, name, dbName, avatar, redirectTo } = data;
 
         // Console'da bilgileri göster
         console.log("Login successful:", {
-          token: data.data.token,
-          companyId: data.data.companyId,
-          dbName: data.data.dbName,
-          redirectTo: data.data.redirectTo,
+          token,
+          companyId,
+          name,
+          dbName,
+          redirectTo,
         });
 
-        // Şirket bilgilerini console'da göster
-        toast.info(`${data.data.name} şirketi için giriş yapıldı`);
+        // SessionStorage'a kaydet
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("avatar", avatar);
+        sessionStorage.setItem("companyId", companyId.toString());
+        sessionStorage.setItem("companyName", name); // Firma adını kaydet
+        sessionStorage.setItem("dbName", dbName);
+        sessionStorage.setItem("email", email.trim());
 
-        // Admin paneline yönlendirme
+        // Kullanıcıya firma adını göster
+        toast.info(`${name} şirketi için giriş yapıldı`);
+
+        // Yönlendirme
         setTimeout(() => {
-          // React Router kullanıyorsanız:
-          // navigate(data.data.redirectTo || '/admin/dashboard');
-
-          // Veya doğrudan window.location kullanarak:
-          const redirectUrl = data.data.redirectTo || "/dashboard";
+          const redirectUrl = redirectTo || "/dashboard";
           console.log("Redirecting to:", redirectUrl);
           window.location.href = redirectUrl;
-        }, 1500);
+        }, 2000);
       } else {
         // Backend success: false döndü
-        toast.error(data.message || "Giriş başarısız.");
-        console.error("Login failed:", data);
+        toast.error(responseData.message || "Giriş başarísız.");
+        console.error("Login failed:", responseData);
       }
     } catch (error: any) {
       console.error("Giriş hatası:", error);

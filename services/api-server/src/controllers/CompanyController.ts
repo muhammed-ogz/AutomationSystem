@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import pino, { Logger } from "pino";
 import { v4 as uuidv4 } from "uuid";
-import { INTERNAL_SERVER_API_ERROR } from "../api";
 import Company from "../database/mongodb/models/Company";
 import { createCompanyDatabase } from "../services/databaseService";
 
@@ -17,7 +17,8 @@ export class CompanyController {
       .put("/:id", this.updateCompany.bind(this))
       .delete("/:id", this.deactivateCompany.bind(this))
       .get("/:id/database", this.getCompanyDatabaseInfo.bind(this))
-      .post("/register", this.createCompany.bind(this));
+      .post("/register", this.createCompany.bind(this))
+      .post("/login", this.companyLogin.bind(this));
   }
   // Yeni şirket oluştur
   async createCompany(req: Request, res: Response) {
@@ -324,51 +325,154 @@ export class CompanyController {
       if (!email || !password) {
         return res.status(400).json({
           success: false,
-          message: "Email and password are required",
+          message: "Email ve şifre gereklidir",
         });
       }
-      // Şirketi email ile bul
-      const company = await Company.findOne({ email });
 
+      // Email format kontrolü
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Geçersiz email formatı",
+        });
+      }
+
+      // Şirketi ana veritabanında bul
+      const company = await Company.findOne({ email });
       if (!company) {
         return res.status(404).json({
           success: false,
-          message:
-            "Company not found. Please check your email address or password.",
+          message: "Şirket bulunamadı. Email adresinizi kontrol edin.",
         });
       }
 
+      // Şifre doğrulama
       const isMatch = await bcrypt.compare(password, company.password);
       if (!isMatch) {
         return res.status(401).json({
           success: false,
-          message: "Invalid password. Please try again.",
+          message: "Geçersiz şifre. Lütfen tekrar deneyin.",
         });
       }
 
-      const token = jwt.sign(
-        {
-          email: company.email,
-          name: company.name,
-          companyId: company.companyId,
-        },
-        { expiresIn: "2h" }
+      // Company database name'i doğru şekilde oluştur
+      const companyDbName =
+        company.databaseName || `company_${company.companyId}`;
+      console.log(
+        `Attempting login for company: ${company.name}, DB: ${companyDbName}`
       );
 
+      // Veritabanı bağlantısını test et
+      try {
+        await this.connectToCompanyDatabase(companyDbName);
+        this.logger.info(
+          `Successfully connected to company database: ${companyDbName}`
+        );
+      } catch (dbError: any) {
+        this.logger.error(
+          `Failed to connect to company database ${companyDbName}: ${dbError.message}`
+        );
+
+        // Geliştirme ortamında detaylı hata, production'da genel hata
+        const errorMessage =
+          process.env.NODE_ENV === "development"
+            ? `Veritabanı bağlantı hatası: ${dbError.message}`
+            : "Şirket veritabanına bağlanırken hata oluştu.";
+
+        return res.status(500).json({
+          success: false,
+          message: errorMessage,
+        });
+      }
+
+      // JWT token oluştur
+      const tokenPayload = {
+        email: company.email,
+        name: company.name,
+        companyId: company.companyId,
+        dbName: companyDbName,
+      };
+
+      const token = jwt.sign(
+        tokenPayload,
+        process.env.JWT_SECRET || "your-secret-key",
+        { expiresIn: "24h" } // Token süresini artırdım
+      );
+
+      // Başarılı giriş yanıtı
       res.status(200).json({
         success: true,
-        message: "Login successful",
+        message: "Giriş başarılı",
         data: {
           token,
           companyId: company.companyId,
           name: company.name,
           email: company.email,
           avatar: company.avatar,
+          dbName: companyDbName,
+          redirectTo: `/dashboard`,
         },
       });
+
+      this.logger.info(
+        `Successful login for company: ${company.name} (${company.email})`
+      );
     } catch (error: any) {
       this.logger.error(`Company login error: ${error.message}`);
-      res.status(500).json({ message: INTERNAL_SERVER_API_ERROR }).end();
+
+      // Detaylı hata mesajı (sadece geliştirme ortamında)
+      const errorResponse = {
+        success: false,
+        message: "Sunucu hatası. Lütfen tekrar deneyin.",
+        ...(process.env.NODE_ENV === "development" && {
+          error: error.message,
+          stack: error.stack,
+        }),
+      };
+
+      res.status(500).json(errorResponse);
+    }
+  }
+  // Düzeltilmiş connectToCompanyDatabase fonksiyonu
+  private async connectToCompanyDatabase(dbName: string): Promise<void> {
+    try {
+      // Connection string'i oluştur
+      const connectionString = `${process.env.MONGODB_COMP_DB}/${dbName}${process.env.MONGODB_OPTIONS}`;
+
+      console.log(`Attempting to connect to: ${connectionString}`);
+
+      // MongoDB bağlantısını oluştur
+      const companyConnection = mongoose.createConnection(connectionString);
+
+      // Bağlantı event listeners
+      companyConnection.on("connected", () => {
+        console.log(`Successfully connected to company database: ${dbName}`);
+      });
+
+      companyConnection.on("error", (error) => {
+        console.error(`Database connection error: ${error}`);
+      });
+
+      companyConnection.on("disconnected", () => {
+        console.log(`Disconnected from company database: ${dbName}`);
+      });
+
+      // Bağlantıyı test et
+      await new Promise<void>((resolve, reject) => {
+        companyConnection.once("connected", () => {
+          resolve();
+        });
+
+        companyConnection.once("error", (error) => {
+          reject(new Error(`Connection failed: ${error.message}`));
+        });
+      });
+
+      console.log(`Database connection successfully validated for: ${dbName}`);
+    } catch (error: any) {
+      console.error(`Database connection failed for ${dbName}:`, error);
+      throw new Error(`Database connection failed: ${error.message}`);
     }
   }
 }

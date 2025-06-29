@@ -103,15 +103,16 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsLoading(true);
 
+    // Temel validasyonlar
     if (!email || !password) {
-      toast.info("Lütfen tüm alanları doldurun.");
+      toast.error("Lütfen tüm alanları doldurun.");
       setIsLoading(false);
       return;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Geçersiz email formatı.");
@@ -119,27 +120,87 @@ const Login = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
+    const requestData = {
+      email: email.trim(),
+      password: password.trim(),
+    };
 
     try {
+      console.log("Login attempt for:", email);
+
       const res = await fetch("http://localhost:5000/login", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
       });
-      if (!res.ok) {
-        throw new Error("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.");
-      }
+
       const data = await res.json();
-      if (data.success) {
-        toast.success("Giriş başarılı!");
-        // Burada başarılı giriş sonrası yönlendirme veya state güncelleme yapılabilir
+      console.log("Login response:", data);
+
+      if (!res.ok) {
+        // HTTP status code hatası
+        const errorMessage = data.message || `HTTP Error: ${res.status}`;
+        toast.error(errorMessage);
+        console.error("Login failed with status:", res.status, data);
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
-    } catch (error) {
+
+      if (data.success) {
+        // Başarılı giriş
+        toast.success(data.message || "Giriş başarılı!");
+
+        // Console'da bilgileri göster
+        console.log("Login successful:", {
+          token: data.data.token,
+          companyId: data.data.companyId,
+          dbName: data.data.dbName,
+          redirectTo: data.data.redirectTo,
+        });
+
+        // Şirket bilgilerini console'da göster
+        toast.info(`${data.data.name} şirketi için giriş yapıldı`);
+
+        // Admin paneline yönlendirme
+        setTimeout(() => {
+          // React Router kullanıyorsanız:
+          // navigate(data.data.redirectTo || '/admin/dashboard');
+
+          // Veya doğrudan window.location kullanarak:
+          const redirectUrl = data.data.redirectTo || "/dashboard";
+          console.log("Redirecting to:", redirectUrl);
+          window.location.href = redirectUrl;
+        }, 1500);
+      } else {
+        // Backend success: false döndü
+        toast.error(data.message || "Giriş başarısız.");
+        console.error("Login failed:", data);
+      }
+    } catch (error: any) {
       console.error("Giriş hatası:", error);
-      toast.error("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+
+      // Network veya diğer hatalar için detaylı error handling
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        toast.error(
+          "Sunucuya bağlanılamıyor. Lütfen sunucunun çalıştığından emin olun."
+        );
+      } else if (error.name === "SyntaxError") {
+        toast.error("Sunucudan geçersiz yanıt alındı.");
+      } else {
+        toast.error("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+      }
+
+      // Geliştirme ortamında detaylı hata bilgisi
+      if (process.env.NODE_ENV === "development") {
+        console.error("Detailed error:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        });
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -185,7 +246,8 @@ const Login = () => {
             Giriş Yap
           </h2>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            {/* Form olarak çalışacak div */}
             <div
               className="animate-slideInFromRight"
               style={{ animationDelay: "0.1s" }}
@@ -227,7 +289,8 @@ const Login = () => {
               style={{ animationDelay: "0.3s" }}
             >
               <button
-                type="submit"
+                type="button"
+                onClick={handleSubmit}
                 disabled={isLoading}
                 className={`
                   w-full bg-gray-600 text-white py-3 rounded-lg font-semibold
@@ -256,7 +319,7 @@ const Login = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               </button>
             </div>
-          </form>
+          </div>
 
           <div
             className="mt-6 text-center animate-fadeIn"

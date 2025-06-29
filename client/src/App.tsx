@@ -34,7 +34,7 @@ function App() {
         <Route path="/register" element={<RegisterUser />} />
 
         {/* DefaultLayout içine sarılı rotalar */}
-        <Route path="/" element={<LayoutWrapper />}>
+        <Route path="/dashboard" element={<LayoutWrapper />}>
           <Route index element={<Home />} />
           <Route path="products" element={<ListProduct />} />
           <Route path="products/edit/:id" element={<EditProduct />} />

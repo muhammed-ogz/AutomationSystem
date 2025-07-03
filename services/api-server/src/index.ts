@@ -4,6 +4,7 @@ import express from "express";
 import mongoose, { connect } from "mongoose";
 import path from "path";
 import pino from "pino";
+import { ProductController } from "./controllers/ProductController";
 
 // Services
 import CompanyController from "./controllers/CompanyController";
@@ -79,8 +80,10 @@ app.use((err: any, _req: express.Request, res: express.Response) => {
 });
 
 const companyController = new CompanyController(logger);
+const productController = new ProductController(logger);
 
 companyController.registeredRoutes(router);
+productController.registeredRoutes(router);
 app.use(router);
 
 // Graceful shutdown

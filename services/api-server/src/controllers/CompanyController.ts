@@ -1,14 +1,13 @@
 import bcrypt from "bcryptjs";
 import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import pino, { Logger } from "pino";
+import mongoose, { Connection } from "mongoose";
+import { Logger } from "pino";
 import { v4 as uuidv4 } from "uuid";
 import Company from "../database/mongodb/models/Company";
 import { createCompanyDatabase } from "../services/databaseService";
 
-const logger = pino();
-
+const connectionCache: Map<string, Connection> = new Map();
 export class CompanyController {
   public constructor(private readonly logger: Logger) {}
   public registeredRoutes(router: Router) {
@@ -228,7 +227,7 @@ export class CompanyController {
         });
       }
 
-      logger.info(`Company updated: ${company.name}`);
+      this.logger.info(`Company updated: ${company.name}`);
 
       res.status(200).json({
         success: true,
@@ -262,7 +261,7 @@ export class CompanyController {
         });
       }
 
-      logger.info(`Company deactivated: ${company.name}`);
+      this.logger.info(`Company deactivated: ${company.name}`);
 
       res.status(200).json({
         success: true,
@@ -363,7 +362,7 @@ export class CompanyController {
         `Attempting login for company: ${company.name}, DB: ${companyDbName}`
       );
 
-      // Veritabanı bağlantısını test et
+      // Veritabanı bağlantısını aç ve cache'le
       try {
         await this.connectToCompanyDatabase(companyDbName);
         this.logger.info(
@@ -374,7 +373,6 @@ export class CompanyController {
           `Failed to connect to company database ${companyDbName}: ${dbError.message}`
         );
 
-        // Geliştirme ortamında detaylı hata, production'da genel hata
         const errorMessage =
           process.env.NODE_ENV === "development"
             ? `Veritabanı bağlantı hatası: ${dbError.message}`
@@ -397,7 +395,7 @@ export class CompanyController {
       const token = jwt.sign(
         tokenPayload,
         process.env.JWT_SECRET || "your-secret-key",
-        { expiresIn: "24h" } // Token süresini artırdım
+        { expiresIn: "24h" }
       );
 
       res.status(200).json({
@@ -420,7 +418,6 @@ export class CompanyController {
     } catch (error: any) {
       this.logger.error(`Company login error: ${error.message}`);
 
-      // Detaylı hata mesajı (sadece geliştirme ortamında)
       const errorResponse = {
         success: false,
         message: "Sunucu hatası. Lütfen tekrar deneyin.",
@@ -433,15 +430,24 @@ export class CompanyController {
       res.status(500).json(errorResponse);
     }
   }
-  // Düzeltilmiş connectToCompanyDatabase fonksiyonu
-  private async connectToCompanyDatabase(dbName: string): Promise<void> {
+
+  // Cache destekli bağlantı açma fonksiyonu
+  private async connectToCompanyDatabase(dbName: string): Promise<Connection> {
+    if (connectionCache.has(dbName)) {
+      console.log(`Using cached connection for DB: ${dbName}`);
+      return connectionCache.get(dbName)!;
+    }
+
     try {
       const connectionString = `${process.env.MONGODB_COMP_DB}/${dbName}${process.env.MONGODB_OPTIONS}`;
-
       console.log(`Attempting to connect to: ${connectionString}`);
-      const companyConnection = mongoose.createConnection(connectionString);
 
-      // Bağlantı event listeners
+      const companyConnection = await mongoose.createConnection(
+        connectionString,
+        {}
+      );
+
+      // Event dinleyicileri (opsiyonel)
       companyConnection.on("connected", () => {
         console.log(`Successfully connected to company database: ${dbName}`);
       });
@@ -454,18 +460,17 @@ export class CompanyController {
         console.log(`Disconnected from company database: ${dbName}`);
       });
 
-      // Bağlantıyı test et
+      // Bağlantı açılmasını bekle (mongoose.createConnection artık Promise dönüyor)
       await new Promise<void>((resolve, reject) => {
-        companyConnection.once("connected", () => {
-          resolve();
-        });
-
-        companyConnection.once("error", (error) => {
-          reject(new Error(`Connection failed: ${error.message}`));
-        });
+        companyConnection.once("connected", () => resolve());
+        companyConnection.once("error", (err) => reject(err));
       });
 
+      connectionCache.set(dbName, companyConnection);
+
       console.log(`Database connection successfully validated for: ${dbName}`);
+
+      return companyConnection;
     } catch (error: any) {
       console.error(`Database connection failed for ${dbName}:`, error);
       throw new Error(`Database connection failed: ${error.message}`);

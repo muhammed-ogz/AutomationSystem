@@ -1,4 +1,4 @@
-import { Outlet, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "./index.css";
 import DefaultLayout from "./layout/DefaultLayout";
@@ -30,6 +30,7 @@ function App() {
       <ToastContainer />
       <Routes>
         {/* Login ve Register doğrudan render edilir */}
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterUser />} />
 

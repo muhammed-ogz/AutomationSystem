@@ -4,7 +4,7 @@ import express from "express";
 import mongoose, { connect } from "mongoose";
 import path from "path";
 import pino from "pino";
-import { ProductController } from "./controllers/ProductController";
+import { CompanyProductController } from "./controllers/ProductController";
 
 // Services
 import CompanyController from "./controllers/CompanyController";
@@ -13,9 +13,9 @@ import { closeAllConnections } from "./services/databaseService";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
+const router = express.Router();
 const logger = pino();
 const PORT = 5000;
-const router = express.Router();
 
 // Express ayarları
 app.set("x-powered-by", false);
@@ -46,9 +46,8 @@ app.options("*", cors());
 
 // Static files
 app.use("/public", express.static(path.join(__dirname, "../public")));
-app.use(router);
 
-// Health check endpoint
+// Health check endpoint (middleware gerektirmez)
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -57,6 +56,14 @@ app.get("/health", (_req, res) => {
     environment: process.env.NODE_ENV || "development",
   });
 });
+
+// ========== CONTROLLER SETUP ==========
+const companyController = new CompanyController(logger);
+const productController = new CompanyProductController(logger);
+
+companyController.registeredRoutes(router);
+productController.registeredRoutes(router);
+app.use(router);
 
 // 404 handler
 app.use("*", (req, res) => {
@@ -78,13 +85,6 @@ app.use((err: any, _req: express.Request, res: express.Response) => {
     ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   });
 });
-
-const companyController = new CompanyController(logger);
-const productController = new ProductController(logger);
-
-companyController.registeredRoutes(router);
-productController.registeredRoutes(router);
-app.use(router);
 
 // Graceful shutdown
 const gracefulShutdown = async (signal: string) => {
@@ -127,7 +127,7 @@ process.on("uncaughtException", (error: Error) => {
     logger.info("Starting application...");
 
     // Environment variables kontrolü
-    const requiredEnvVars = ["MONGODB_URI"];
+    const requiredEnvVars = ["MONGODB_URI", "MONGODB_COMP_DB"];
     const missingEnvVars = requiredEnvVars.filter(
       (envVar) => !process.env[envVar]
     );

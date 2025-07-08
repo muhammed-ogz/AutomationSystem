@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters, AiOutlineUpload } from "react-icons/ai";
+import { toast } from "react-toastify";
 
 const AddProduct = () => {
   const [productName, setProductName] = useState("");
@@ -7,9 +8,17 @@ const AddProduct = () => {
   const [stock, setStock] = useState("");
   const [image, setImage] = useState<string | ArrayBuffer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [companyId, setCompanyId] = useState(""); // CompanyId için
 
+  useEffect(() => {
+    // CompanyId'yi sessionStorage'dan al
+    const storedCompanyId = sessionStorage.getItem("companyId");
+    if (storedCompanyId) {
+      setCompanyId(storedCompanyId);
+    } else {
+      toast.error("Şirket ID bulunamadı. Lütfen giriş yapın.");
+    }
+  }, []);
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) {
@@ -24,12 +33,11 @@ const AddProduct = () => {
   const handleSubmit = async () => {
     // Validation
     if (!productName || !price || !stock) {
-      setMessage("Lütfen tüm alanları doldurunuz!");
+      toast.info("Lütfen tüm alanları doldurunuz!");
       return;
     }
 
     setIsLoading(true);
-    setMessage("");
 
     try {
       const productData = {
@@ -39,11 +47,13 @@ const AddProduct = () => {
         ProductQuantity: parseInt(stock),
         ProductImage: image ? image.toString() : "null",
       };
+      console.log("Gönderilen Ürün Verisi:", productData);
 
       const response = await fetch("http://localhost:5000/add-product", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
         },
         body: JSON.stringify(productData),
       });
@@ -51,7 +61,7 @@ const AddProduct = () => {
       if (response.ok) {
         const result = await response.json();
         console.log(result);
-        setMessage("Ürün başarıyla kaydedildi! ✅");
+        toast.success("Ürün başarıyla kaydedildi! ✅");
 
         // Form'u temizle
         setProductName("");
@@ -67,11 +77,11 @@ const AddProduct = () => {
         if (fileInput) fileInput.value = "";
       } else {
         const errorData = await response.json();
-        setMessage(`Hata: ${errorData.message || "Bir hata oluştu!"}`);
+        toast.error(`Hata: ${errorData.message || "Bir hata oluştu!"}`);
       }
     } catch (error) {
       console.error("Fetch error:", error);
-      setMessage("Sunucuya bağlanırken bir hata oluştu!");
+      toast.error("Sunucuya bağlanırken bir hata oluştu!");
     } finally {
       setIsLoading(false);
     }
@@ -81,19 +91,6 @@ const AddProduct = () => {
     <section id="edit-product" className="m-10">
       <div className="bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-2xl mx-auto">
         <h1 className="text-3xl font-semibold text-white mb-6">🛠️ Ürün Ekle</h1>
-
-        {/* Message */}
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded-lg ${
-              message.includes("başarıyla")
-                ? "bg-green-600 text-white"
-                : "bg-red-600 text-white"
-            }`}
-          >
-            {message}
-          </div>
-        )}
 
         {/* Form Fields */}
         <div className="space-y-6">

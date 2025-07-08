@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
           {/* Navigasyon Menüsü */}
           <nav className="hidden lg:flex space-x-2">
             <a
-              href="/"
+              href="/dashboard"
               className="flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-cyan-600 transition-colors duration-200 text-gray-300 hover:text-white"
             >
               <FaHome className="mr-2" />
@@ -122,7 +122,7 @@ const Navbar: React.FC = () => {
           {/* Ayarlar */}
           <button
             className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-            onClick={() => (window.location.href = "/settings")}
+            onClick={() => (window.location.href = "/dashboard/settings")}
           >
             <FaCog className="text-gray-300 hover:text-white" />
           </button>
@@ -174,7 +174,7 @@ const Navbar: React.FC = () => {
                     Profil Bilgileri
                   </a>
                   <a
-                    href="/account"
+                    href="/dashboard/account"
                     className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   >
                     <FaCog className="mr-3" />
@@ -199,14 +199,14 @@ const Navbar: React.FC = () => {
       <div className="lg:hidden px-6 pb-3">
         <div className="flex space-x-2">
           <a
-            href="#"
+            href="/dashboard"
             className="flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-cyan-600 transition-colors text-gray-300 hover:text-white"
           >
             <FaHome className="mr-2" />
             Ana
           </a>
           <a
-            href="#"
+            href="/dashboard/reports"
             className="flex items-center bg-gray-800 px-3 py-2 text-sm rounded-lg hover:bg-orange-600 transition-colors text-gray-300 hover:text-white"
           >
             <HiDocumentReport className="mr-2" />

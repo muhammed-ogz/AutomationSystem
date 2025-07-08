@@ -431,7 +431,6 @@ export class CompanyController {
     }
   }
 
-  // Cache destekli bağlantı açma fonksiyonu
   private async connectToCompanyDatabase(dbName: string): Promise<Connection> {
     if (connectionCache.has(dbName)) {
       console.log(`Using cached connection for DB: ${dbName}`);
@@ -447,7 +446,6 @@ export class CompanyController {
         {}
       );
 
-      // Event dinleyicileri (opsiyonel)
       companyConnection.on("connected", () => {
         console.log(`Successfully connected to company database: ${dbName}`);
       });
@@ -460,7 +458,6 @@ export class CompanyController {
         console.log(`Disconnected from company database: ${dbName}`);
       });
 
-      // Bağlantı açılmasını bekle (mongoose.createConnection artık Promise dönüyor)
       await new Promise<void>((resolve, reject) => {
         companyConnection.once("connected", () => resolve());
         companyConnection.once("error", (err) => reject(err));

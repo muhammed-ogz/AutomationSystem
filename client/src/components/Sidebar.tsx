@@ -1,27 +1,31 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { BiLogOut } from "react-icons/bi";
 import { FiSettings } from "react-icons/fi";
 import { IoMdStats } from "react-icons/io";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const menuItems = [
-  { name: "Ana Sayfa", icon: <AiOutlineDashboard />, link: "/" },
+  { name: "Ana Sayfa", icon: <AiOutlineDashboard />, link: "/dashboard" },
   {
     name: "Stok Takibi",
     icon: <IoMdStats />,
     subItems: [
-      { name: "Stokları Listele", link: "/products", icon: <IoMdStats /> },
+      {
+        name: "Stokları Listele",
+        link: "/dashboard/products",
+        icon: <IoMdStats />,
+      },
       {
         name: "Stok Ekle",
-        link: "/products/add",
+        link: "/dashboard/products/add",
         icon: <MdOutlinePlaylistAdd />,
       },
     ],
   },
-  { name: "Ayarlar", icon: <FiSettings />, link: "/settings" },
+  { name: "Ayarlar", icon: <FiSettings />, link: "/dashboard/settings" },
   { name: "Çıkış Yap", icon: <BiLogOut />, link: "/logout" },
 ];
 

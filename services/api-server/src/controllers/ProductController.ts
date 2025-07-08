@@ -1,4 +1,5 @@
 import { Response, Router } from "express";
+import { Types } from "mongoose";
 import { Logger } from "pino";
 import { getCompanyInventoriesModel } from "../database/mongodb/models/CompanyInventories";
 import {
@@ -11,28 +12,46 @@ export class CompanyProductController {
 
   public registeredRoutes(router: Router) {
     router
-      .post("/add-product", companyAuthMiddleware, this.addProduct.bind(this))
-      .get("/products", companyAuthMiddleware, this.getProducts.bind(this))
+
+      // Ürün ekleme (spesifik POST)
+      .post("/products", companyAuthMiddleware, this.addProduct.bind(this))
+
+      // Ürün sayısı (spesifik GET)
       .get(
-        "/product/:id",
+        "/products/count",
         companyAuthMiddleware,
-        this.getProductById.bind(this)
+        this.getProductCount.bind(this)
       )
-      .put("/product/:id", companyAuthMiddleware, this.updateProduct.bind(this))
-      .delete(
-        "/product/:id",
-        companyAuthMiddleware,
-        this.deleteProduct.bind(this)
-      )
+
+      // Az stoktakiler (spesifik GET)
       .get(
         "/products/low-stock",
         companyAuthMiddleware,
         this.getLowStockProducts.bind(this)
       )
+
+      // Tüm stok (spesifik GET → yeni isimlendirme)
+      .get("/inventories", companyAuthMiddleware, this.getProducts.bind(this))
+
+      // Belirli ürün getir (dinamik GET → ALTA)
       .get(
-        "/products/count",
+        "/products/:id",
         companyAuthMiddleware,
-        this.getProductCount.bind(this)
+        this.getProductById.bind(this)
+      )
+
+      // Belirli ürün güncelle (dinamik PUT → ALTA)
+      .put(
+        "/products/:id",
+        companyAuthMiddleware,
+        this.updateProduct.bind(this)
+      )
+
+      // Belirli ürün sil (dinamik DELETE → ALTA)
+      .delete(
+        "/products/:id",
+        companyAuthMiddleware,
+        this.deleteProduct.bind(this)
       );
   }
 
@@ -149,6 +168,7 @@ export class CompanyProductController {
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
+    console.log("✅ getProducts route hit");
     try {
       const companyInfo = req.companyInfo!;
       const connection = req.companyConnection!;
@@ -178,7 +198,7 @@ export class CompanyProductController {
       res.status(200).json({
         success: true,
         message: "Ürünler başarıyla getirildi",
-        data: products,
+        products: products, // ✅ Frontend'in beklediği format
         pagination: {
           currentPage: pageNumber,
           totalPages,
@@ -189,6 +209,56 @@ export class CompanyProductController {
       });
     } catch (error: any) {
       this.logger.error(`Get products error: ${error.message}`);
+      res.status(500).json({
+        success: false,
+        message: "Sunucu hatası",
+        ...(process.env.NODE_ENV === "development" && {
+          error: error.message,
+        }),
+      });
+    }
+  }
+
+  // Delete method için de ID validasyonu
+  public async deleteProduct(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      // ✅ ID validasyonu
+      if (!Types.ObjectId.isValid(id)) {
+        res.status(400).json({
+          success: false,
+          message: "Geçersiz ürün ID'si",
+        });
+        return;
+      }
+
+      const companyInfo = req.companyInfo!;
+      const connection = req.companyConnection!;
+      const CompanyInventories = getCompanyInventoriesModel(connection);
+
+      const product = await CompanyInventories.findOneAndDelete({
+        _id: id,
+        CompanyId: companyInfo.companyId,
+      });
+
+      if (!product) {
+        res.status(404).json({
+          success: false,
+          message: "Ürün bulunamadı",
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Ürün başarıyla silindi",
+      });
+    } catch (error: any) {
+      this.logger.error(`Delete product error: ${error.message}`);
       res.status(500).json({
         success: false,
         message: "Sunucu hatası",
@@ -316,50 +386,6 @@ export class CompanyProductController {
         return;
       }
 
-      res.status(500).json({
-        success: false,
-        message: "Sunucu hatası",
-        ...(process.env.NODE_ENV === "development" && {
-          error: error.message,
-        }),
-      });
-    }
-  }
-
-  // Ürün silme
-  public async deleteProduct(
-    req: AuthenticatedRequest,
-    res: Response
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-      const companyInfo = req.companyInfo!;
-      const connection = req.companyConnection!;
-
-      const CompanyInventories = getCompanyInventoriesModel(connection);
-
-      const deletedProduct = await CompanyInventories.findOneAndDelete({
-        _id: id,
-        CompanyId: companyInfo.companyId,
-      });
-
-      if (!deletedProduct) {
-        res.status(404).json({
-          success: false,
-          message: "Ürün bulunamadı",
-        });
-        return;
-      }
-
-      this.logger.info(`Product deleted by company ${companyInfo.name}: ${id}`);
-
-      res.status(200).json({
-        success: true,
-        message: "Ürün başarıyla silindi",
-        data: deletedProduct,
-      });
-    } catch (error: any) {
-      this.logger.error(`Delete product error: ${error.message}`);
       res.status(500).json({
         success: false,
         message: "Sunucu hatası",

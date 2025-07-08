@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useState, type JSX } from "react";
+import React, { useEffect, useState, type JSX } from "react";
 import { FaBox } from "react-icons/fa";
 import {
   MdAdd,
@@ -12,10 +12,11 @@ import {
   MdTrendingUp,
   MdWarning,
 } from "react-icons/md";
+import { toast } from "react-toastify";
 
 // Type Definitions
 interface Product {
-  id: number;
+  _id: number;
   name: string;
   price: string;
   priceNumber: number;
@@ -28,9 +29,9 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
-  onView: (id: number) => void;
+  onEdit: (_id: number) => void;
+  onDelete: (_id: number) => void;
+  onView: (_id: number) => void;
 }
 
 interface FilterState {
@@ -40,88 +41,15 @@ interface FilterState {
   sortOrder: "asc" | "desc";
 }
 
-// Mock Data
-const products: Product[] = [
-  {
-    id: 1,
-    name: "MacBook Pro M3",
-    price: "₺65.000",
-    priceNumber: 65000,
-    stock: 8,
-    category: "Laptop",
-    image: "https://via.placeholder.com/150/667eea/ffffff?text=MacBook",
-    status: "low-stock",
-    trend: "up",
-  },
-  {
-    id: 2,
-    name: "iPhone 15 Pro Max",
-    price: "₺48.500",
-    priceNumber: 48500,
-    stock: 25,
-    category: "Telefon",
-    image: "https://via.placeholder.com/150/f093fb/ffffff?text=iPhone",
-    status: "in-stock",
-    trend: "up",
-  },
-  {
-    id: 3,
-    name: "AirPods Pro 2",
-    price: "₺6.200",
-    priceNumber: 6200,
-    stock: 0,
-    category: "Kulaklık",
-    image: "https://via.placeholder.com/150/4facfe/ffffff?text=AirPods",
-    status: "out-of-stock",
-    trend: "down",
-  },
-  {
-    id: 4,
-    name: "iPad Air M2",
-    price: "₺22.000",
-    priceNumber: 22000,
-    stock: 15,
-    category: "Tablet",
-    image: "https://via.placeholder.com/150/43e97b/ffffff?text=iPad",
-    status: "in-stock",
-    trend: "stable",
-  },
-  {
-    id: 5,
-    name: "Apple Watch Ultra 2",
-    price: "₺28.000",
-    priceNumber: 28000,
-    stock: 3,
-    category: "Saat",
-    image: "https://via.placeholder.com/150/fbbf24/ffffff?text=Watch",
-    status: "low-stock",
-    trend: "up",
-  },
-];
-
 const ListProduct: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [filter, setFilter] = useState<FilterState>({
     search: "",
     category: "",
     sortBy: "name",
     sortOrder: "asc",
   });
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-
-  const handleEdit = (id: number): void => {
-    console.log(`Editing product ${id}`);
-    // window.location.href = `/products/edit/${id}`;
-  };
-
-  const handleDelete = (id: number): void => {
-    console.log(`Deleting product ${id}`);
-    // Implement delete logic
-  };
-
-  const handleView = (id: number): void => {
-    console.log(`Viewing product ${id}`);
-    // window.location.href = `/products/${id}`;
-  };
 
   const getStatusColor = (status: Product["status"]): string => {
     switch (status) {
@@ -149,6 +77,75 @@ const ListProduct: React.FC = () => {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/inventories", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error("Ürünler getirilirken bir hata oluştu.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("API Response:", data); // ✅ Debug için
+
+      // Backend'den gelen response formatına göre ayarlayın
+      if (data.success && data.products) {
+        setProducts(data.products);
+      } else {
+        setProducts(data.data || []); // Alternatif format
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      toast.error("Ürünler getirilirken bir hata oluştu.");
+    }
+  };
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+  const handleEdit = (id: number) => {
+    window.location.href = `/products/edit/${id}`;
+  };
+  const handleDelete = async (id: number) => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      toast.error("Lütfen giriş yapın.");
+      return;
+    }
+    if (window.confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+      try {
+        const response = await fetch(`http://localhost:5000/products/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          toast.error(`Ürün silinirken bir hata oluştu: ${errorData.message}`);
+          return;
+        }
+        setProducts((prev) => prev.filter((product) => product._id !== id));
+        toast.success("Ürün başarıyla silindi.");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        toast.error(
+          "Ürün silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+        );
+      }
+    }
+  };
+  const handleView = (id: number) => {
+    window.location.href = `/products/view/${id}`;
+  };
   const getTrendIcon = (trend: Product["trend"]): JSX.Element => {
     switch (trend) {
       case "up":
@@ -163,7 +160,7 @@ const ListProduct: React.FC = () => {
   const filteredProducts = products
     .filter(
       (product) =>
-        product.name.toLowerCase().includes(filter.search.toLowerCase()) &&
+        product.name &&
         (filter.category === "" || product.category === filter.category)
     )
     .sort((a, b) => {
@@ -295,7 +292,7 @@ const ListProduct: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() =>
-            (window.location.href = `/products/edit/${product.id}`)
+            (window.location.href = `/products/edit/${product._id}`)
           }
           className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition-all duration-200 backdrop-blur-sm border border-purple-500/30"
         >
@@ -304,7 +301,7 @@ const ListProduct: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onDelete(product.id)}
+          onClick={() => onDelete(product._id)}
           className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all duration-200 backdrop-blur-sm border border-red-500/30"
         >
           <MdOutlineDelete className="text-lg" />
@@ -459,7 +456,7 @@ const ListProduct: React.FC = () => {
           <AnimatePresence>
             {filteredProducts.map((product, index) => (
               <motion.div
-                key={product.id}
+                key={product._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}

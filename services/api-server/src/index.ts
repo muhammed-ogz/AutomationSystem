@@ -7,6 +7,7 @@ import pino from "pino";
 import { CompanyProductController } from "./controllers/ProductController";
 
 // Services
+import process from "process";
 import CompanyController from "./controllers/CompanyController";
 import { closeAllConnections } from "./services/databaseService";
 
@@ -58,11 +59,11 @@ app.get("/health", (_req, res) => {
 });
 
 // ========== CONTROLLER SETUP ==========
-const companyController = new CompanyController(logger);
 const productController = new CompanyProductController(logger);
+const companyController = new CompanyController(logger);
 
-companyController.registeredRoutes(router);
 productController.registeredRoutes(router);
+companyController.registeredRoutes(router);
 app.use(router);
 
 // 404 handler

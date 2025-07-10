@@ -46,8 +46,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 const buttonStyles = {
   blue: "bg-blue-600 hover:bg-blue-500",
-  green: "bg-green-600 hover:bg-green-500", 
-  yellow: "bg-yellow-600 hover:bg-yellow-500"
+  green: "bg-green-600 hover:bg-green-500",
+  yellow: "bg-yellow-600 hover:bg-yellow-500",
 };
 
 const Home: React.FC = () => {
@@ -91,7 +91,7 @@ const Home: React.FC = () => {
               value: "235",
               label: "Kayıtlı Ürün",
               btnText: "Ürün Listesini Görüntüle",
-              btnAction: () => (window.location.href = "/products"),
+              btnAction: () => (window.location.href = "/dashboard/products"),
               btnColor: "blue" as keyof typeof buttonStyles,
             },
             {
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
               value: "8,120",
               label: "Toplam Satış Adeti",
               btnText: "Satışları İstatistiklerini Görüntüle",
-              btnAction: () => (window.location.href = "/statistics"),
+              btnAction: () => (window.location.href = "/dashboard/statistics"),
               btnColor: "green" as keyof typeof buttonStyles,
             },
             {
@@ -107,7 +107,7 @@ const Home: React.FC = () => {
               value: "₺234,567",
               label: "Gelir",
               btnText: "Gelir Detaylarını Görüntüle",
-              btnAction: () => (window.location.href = "/revenue"),
+              btnAction: () => (window.location.href = "/dashboard/revenue"),
               btnColor: "yellow" as keyof typeof buttonStyles,
             },
           ].map((item, idx) => (
@@ -127,7 +127,9 @@ const Home: React.FC = () => {
                 <p className="text-gray-400">{item.label}</p>
                 <button
                   onClick={item.btnAction}
-                  className={`mt-2 p-2 rounded-lg text-white text-sm transition-colors duration-300 ${buttonStyles[item.btnColor]}`}
+                  className={`mt-2 p-2 rounded-lg text-white text-sm transition-colors duration-300 ${
+                    buttonStyles[item.btnColor]
+                  }`}
                 >
                   {item.btnText}
                 </button>

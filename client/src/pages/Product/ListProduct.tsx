@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 
 // Type Definitions
 interface Product {
-  _id: number;
+  _id: string; // Backend'den string geliyor
   name: string;
   price: string;
   priceNumber: number;
@@ -27,11 +27,37 @@ interface Product {
   trend: "up" | "down" | "stable";
 }
 
+// Backend'den gelen veri yapısı
+interface BackendProduct {
+  _id: string;
+  CompanyId: string;
+  ProductName: string;
+  ProductPrice: number;
+  ProductQuantity: number;
+  ProductImage: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface BackendResponse {
+  success: boolean;
+  message: string;
+  products: BackendProduct[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalProducts: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 interface ProductCardProps {
   product: Product;
-  onEdit: (_id: number) => void;
-  onDelete: (_id: number) => void;
-  onView: (_id: number) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onView: (id: string) => void;
 }
 
 interface FilterState {
@@ -43,6 +69,7 @@ interface FilterState {
 
 const ListProduct: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [filter, setFilter] = useState<FilterState>({
     search: "",
@@ -50,6 +77,51 @@ const ListProduct: React.FC = () => {
     sortBy: "name",
     sortOrder: "asc",
   });
+
+  // Backend verisini frontend formatına dönüştüren fonksiyon
+  const transformBackendProduct = (backendProduct: BackendProduct): Product => {
+    const stock = backendProduct.ProductQuantity;
+    const price = backendProduct.ProductPrice;
+
+    // Stok durumunu belirleme
+    let status: Product["status"];
+    if (stock === 0) {
+      status = "out-of-stock";
+    } else if (stock <= 10) {
+      status = "low-stock";
+    } else {
+      status = "in-stock";
+    }
+
+    // Basit kategori belirleme (ProductName'den tahmin)
+    let category = "Genel";
+    const productName = backendProduct.ProductName.toLowerCase();
+    if (productName.includes("telefon") || productName.includes("iphone")) {
+      category = "Elektronik";
+    } else if (
+      productName.includes("koltuk") ||
+      productName.includes("takım")
+    ) {
+      category = "Mobilya";
+    } else if (productName.includes("çakmak")) {
+      category = "Aksesuar";
+    }
+
+    return {
+      _id: backendProduct._id,
+      name: backendProduct.ProductName,
+      price: `₺${price.toLocaleString("tr-TR")}`,
+      priceNumber: price,
+      stock: stock,
+      category: category,
+      image:
+        backendProduct.ProductImage === "null"
+          ? "/placeholder-product.jpg"
+          : backendProduct.ProductImage,
+      status: status,
+      trend: "stable", // Şimdilik stable, gelecekte trend hesaplama eklenebilir
+    };
+  };
 
   const getStatusColor = (status: Product["status"]): string => {
     switch (status) {
@@ -79,41 +151,52 @@ const ListProduct: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
+      setLoading(true);
       const token = sessionStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/inventories", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_SERVER}/inventories`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         toast.error("Ürünler getirilirken bir hata oluştu.");
         return;
       }
 
-      const data = await response.json();
-      console.log("API Response:", data); // ✅ Debug için
+      const data: BackendResponse = await response.json();
+      console.log("API Response:", data);
 
-      // Backend'den gelen response formatına göre ayarlayın
       if (data.success && data.products) {
-        setProducts(data.products);
+        // Backend verisini frontend formatına dönüştür
+        const transformedProducts = data.products.map(transformBackendProduct);
+        setProducts(transformedProducts);
       } else {
-        setProducts(data.data || []); // Alternatif format
+        toast.error("Ürün verisi bulunamadı.");
+        setProducts([]);
       }
     } catch (err) {
       console.error("Error fetching products:", err);
       toast.error("Ürünler getirilirken bir hata oluştu.");
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchProducts();
   }, []);
-  const handleEdit = (id: number) => {
-    window.location.href = `/products/edit/${id}`;
+
+  const handleEdit = (id: string) => {
+    window.location.href = `/dashboard/products/edit/${id}`;
   };
-  const handleDelete = async (id: number) => {
+
+  const handleDelete = async (id: string) => {
     const token = sessionStorage.getItem("token");
     if (!token) {
       toast.error("Lütfen giriş yapın.");
@@ -121,13 +204,16 @@ const ListProduct: React.FC = () => {
     }
     if (window.confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
       try {
-        const response = await fetch(`http://localhost:5000/products/${id}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_SERVER}/products/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!response.ok) {
           const errorData = await response.json();
           toast.error(`Ürün silinirken bir hata oluştu: ${errorData.message}`);
@@ -143,9 +229,11 @@ const ListProduct: React.FC = () => {
       }
     }
   };
-  const handleView = (id: number) => {
+
+  const handleView = (id: string) => {
     window.location.href = `/products/view/${id}`;
   };
+
   const getTrendIcon = (trend: Product["trend"]): JSX.Element => {
     switch (trend) {
       case "up":
@@ -161,6 +249,7 @@ const ListProduct: React.FC = () => {
     .filter(
       (product) =>
         product.name &&
+        product.name.toLowerCase().includes(filter.search.toLowerCase()) &&
         (filter.category === "" || product.category === filter.category)
     )
     .sort((a, b) => {
@@ -180,6 +269,34 @@ const ListProduct: React.FC = () => {
     });
 
   const categories = Array.from(new Set(products.map((p) => p.category)));
+
+  // Loading komponenti
+  const LoadingSpinner = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col items-center justify-center py-16"
+    >
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+        <div
+          className="absolute inset-0 w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"
+          style={{ animationDelay: "0.15s" }}
+        ></div>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-6 text-center"
+      >
+        <h3 className="text-xl font-semibold text-white mb-2">
+          Ürünler Yükleniyor...
+        </h3>
+        <p className="text-gray-400">Lütfen bekleyin, veriler getiriliyor</p>
+      </motion.div>
+    </motion.div>
+  );
 
   const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete }) => (
     <motion.div
@@ -228,6 +345,11 @@ const ListProduct: React.FC = () => {
               src={product.image}
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src =
+                  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xMiA5QzEwLjM0IDkgOSAxMC4zNCA5IDEyUzEwLjM0IDE1IDEyIDE1IDE1IDEzLjY2IDE1IDEyIDEzLjY2IDkgMTIgOVpNMTIgMTNDMTEuNDUgMTMgMTEgMTIuNTUgMTEgMTJTMTEuNDUgMTEgMTIgMTFTMTMgMTEuNDUgMTMgMTJTMTIuNTUgMTMgMTIgMTNaIiBmaWxsPSIjNkI3Mjg5Ii8+CjxwYXRoIGQ9Ik0xMiA2QzE0LjIxIDYgMTYgNy43OSAxNiAxMFMxNC4yMSAxNCAxMiAxNEMxMC4zNiAxNCA4Ljk0IDEzLjM3IDcuOTQgMTIuMzZMOC42NSAxMS42NEM5LjM1IDEyLjM1IDEwLjYxIDEyLjc5IDEyIDEyLjc5QzEzLjU3IDEyLjc5IDE0Ljg1IDExLjUxIDE0Ljg1IDEwUzEzLjU3IDcuMjEgMTIgNy4yMVMxMC4zNSA4LjQ5IDEwLjM1IDEwSCA5LjE1QzkuMTUgNy43OSAxMC43OSA2IDEyIDZaIiBmaWxsPSIjNkI3Mjg5Ii8+Cjwvc3ZnPgo=";
+              }}
             />
           </div>
           <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -292,7 +414,7 @@ const ListProduct: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() =>
-            (window.location.href = `/products/edit/${product._id}`)
+            (window.location.href = `/dashboard/products/edit/${product._id}`)
           }
           className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition-all duration-200 backdrop-blur-sm border border-purple-500/30"
         >
@@ -328,8 +450,9 @@ const ListProduct: React.FC = () => {
                 Ürün Listesi
               </h1>
               <p className="text-gray-400 mt-1">
-                Toplam {products.length} ürün • {filteredProducts.length}{" "}
-                görüntüleniyor
+                {loading
+                  ? "Yükleniyor..."
+                  : `Toplam ${products.length} ürün • ${filteredProducts.length} görüntüleniyor`}
               </p>
             </div>
           </div>
@@ -346,7 +469,7 @@ const ListProduct: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => (window.location.href = "/products/add")}
+              onClick={() => (window.location.href = "/dashboard/products/add")}
               className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-300"
             >
               <MdAdd className="text-xl" />
@@ -452,28 +575,32 @@ const ListProduct: React.FC = () => {
         </motion.div>
 
         {/* Products Grid */}
-        <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AnimatePresence>
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <ProductCard
-                  product={product}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onView={handleView}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <motion.div layout className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AnimatePresence>
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ProductCard
+                    product={product}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onView={handleView}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {/* Empty State */}
-        {filteredProducts.length === 0 && (
+        {!loading && filteredProducts.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}

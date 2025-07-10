@@ -49,19 +49,27 @@ const AddProduct = () => {
       };
       console.log("Gönderilen Ürün Verisi:", productData);
 
-      const response = await fetch("http://localhost:5000/add-product", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(productData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_SERVER}/add-product`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(productData),
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
         console.log(result);
-        toast.success("Ürün başarıyla kaydedildi! ✅");
+        toast.success(
+          "Ürün başarıyla kaydedildi! ✅ Listeleme sayfasına yönlendiriliyorsunuz..."
+        );
+        setTimeout(() => {
+          window.location.href = "/dashboard/products";
+        }, 2000);
 
         // Form'u temizle
         setProductName("");

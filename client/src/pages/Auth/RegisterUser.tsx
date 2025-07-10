@@ -184,7 +184,7 @@ const RegisterUser: React.FC = () => {
     console.log("Request Data:", requestData);
 
     try {
-      const res = await fetch("http://localhost:5000/register", {
+      const res = await fetch(`${import.meta.env.VITE_API_SERVER}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

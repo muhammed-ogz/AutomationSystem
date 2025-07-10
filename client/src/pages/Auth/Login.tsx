@@ -128,7 +128,7 @@ const Login = () => {
     try {
       console.log("Login attempt for:", email);
 
-      const res = await fetch("http://localhost:5000/login", {
+      const res = await fetch(`${import.meta.env.VITE_API_SERVER}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

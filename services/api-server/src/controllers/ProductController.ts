@@ -14,7 +14,7 @@ export class CompanyProductController {
     router
 
       // Ürün ekleme (spesifik POST)
-      .post("/products", companyAuthMiddleware, this.addProduct.bind(this))
+      .post("/add-product", companyAuthMiddleware, this.addProduct.bind(this))
 
       // Ürün sayısı (spesifik GET)
       .get(
@@ -33,21 +33,21 @@ export class CompanyProductController {
       // Tüm stok (spesifik GET → yeni isimlendirme)
       .get("/inventories", companyAuthMiddleware, this.getProducts.bind(this))
 
-      // Belirli ürün getir (dinamik GET → ALTA)
+      // Belirli ürün getir (dinamik GET)
       .get(
         "/products/:id",
         companyAuthMiddleware,
         this.getProductById.bind(this)
       )
 
-      // Belirli ürün güncelle (dinamik PUT → ALTA)
+      // Belirli ürün güncelle (dinamik PUT)
       .put(
         "/products/:id",
         companyAuthMiddleware,
         this.updateProduct.bind(this)
       )
 
-      // Belirli ürün sil (dinamik DELETE → ALTA)
+      // Belirli ürün sil (dinamik DELETE)
       .delete(
         "/products/:id",
         companyAuthMiddleware,

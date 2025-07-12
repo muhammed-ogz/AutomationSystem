@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Connection, Schema } from "mongoose";
 
 export interface Statistics extends Document {
   CompanyId: string;
@@ -7,29 +7,35 @@ export interface Statistics extends Document {
   TotalReturns: number;
 }
 
-const StatisticsSchema = new Schema<Statistics>({
-  CompanyId: {
-    required: true,
-    type: String,
+const StatisticsSchema = new Schema<Statistics>(
+  {
+    CompanyId: {
+      required: true,
+      type: String,
+    },
+    TotalProducts: {
+      required: true,
+      type: Number,
+      trim: true,
+      default: 0,
+    },
+    TotalPrice: {
+      required: true,
+      type: Number,
+      trim: true,
+      default: 0,
+    },
+    TotalReturns: {
+      required: true,
+      type: Number,
+      trim: true,
+      default: 0,
+    },
   },
-  TotalProducts: {
-    required: true,
-    type: Number,
-    trim: true,
-    default: 0,
-  },
-  TotalPrice: {
-    required: true,
-    type: Number,
-    trim: true,
-    default: 0,
-  },
-  TotalReturns: {
-    required: true,
-    type: Number,
-    trim: true,
-    default: 0,
-  },
-});
-const Statistics = model<Statistics>("Statistics", StatisticsSchema);
-export default Statistics;
+  {
+    timestamps: true,
+  }
+);
+export const getStatisticsModel = (connection: Connection) => {
+  return connection.model<Statistics>("Statistics", StatisticsSchema);
+};

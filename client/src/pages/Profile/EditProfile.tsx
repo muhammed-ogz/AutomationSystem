@@ -87,6 +87,7 @@ const EditProfile: React.FC = () => {
 
   const securityTips: string[] = [
     "Güçlü ve benzersiz şifreler kullanın",
+    "Şifrenizin içerisinde büyük harf, küçük harf, rakam ve sembol bulundurmanız zorunludur.",
     "İki faktörlü kimlik doğrulamayı etkinleştirin",
     "Düzenli olarak güvenlik güncellemelerini takip edin",
     "Şüpheli aktiviteleri hemen bildirin",
@@ -108,6 +109,26 @@ const EditProfile: React.FC = () => {
     {
       color: "bg-purple-500",
       text: "Güvenlik nedeniyle bazı işlemler ek doğrulama gerektirebilir.",
+    },
+    {
+      color: "bg-red-500",
+      text: "Her firmanın kendine ait bir veritabanı bulunur. Başka bir firmanın verileri ile karışması durumu söz konusu olamaz. Arıza çıkması durumunda, verileriniz güvende kalır.",
+    },
+    {
+      color: "bg-gray-500",
+      text: "Oturum süreniz 1 saat ile sınırlıdır. Oturumunuzun süresi dolduğunda, tekrar giriş yapmanız gerekecektir.",
+    },
+    {
+      color: "bg-teal-500",
+      text: "Herhangi bir sorun yaşarsanız, destek ekibimizle iletişime geçebilirsiniz.",
+    },
+    {
+      color: "bg-orange-500",
+      text: "Profil bilgilerinizi düzenlerken dikkatli olun, yanlış bilgiler sistemde sorunlara yol açabilir.",
+    },
+    {
+      color: "bg-pink-500",
+      text: "Profilinizde yaptığınız değişiklikler, sistem genelinde anında güncellenir.",
     },
   ];
 
@@ -161,10 +182,10 @@ const EditProfile: React.FC = () => {
             </div>
             <div className="text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2">
-                {formData.companyName || "Firma Adınız"}
+                {sessionStorage.getItem("companyName") || "Firma Adı"}
               </h2>
               <p className="text-gray-400 mb-3">
-                {formData.email || "email@firma.com"}
+                {sessionStorage.getItem("email") || "email@firma.com"}
               </p>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900/30 text-blue-300 border border-blue-500/30">
                 Aktif Üye

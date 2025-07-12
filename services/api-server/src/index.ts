@@ -49,7 +49,6 @@ app.options("*", cors());
 // Static files
 app.use("/public", express.static(path.join(__dirname, "../public")));
 
-// Health check endpoint (middleware gerektirmez)
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,

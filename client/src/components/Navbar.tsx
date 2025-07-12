@@ -3,10 +3,13 @@ import { FaBell, FaCog, FaHome, FaSearch, FaUserCircle } from "react-icons/fa";
 import { HiDocumentReport } from "react-icons/hi";
 import { IoLogOut } from "react-icons/io5";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [loadingLogout, setLoadingLogout] = useState(false);
 
   // Örnek kullanıcı bilgileri
   // avatar değeri bir ikon adı (örn: "FaUserCircle") ise, dinamik olarak ikonu göster
@@ -15,6 +18,15 @@ const Navbar: React.FC = () => {
     name: sessionStorage.getItem("companyName"),
     email: sessionStorage.getItem("email"),
     avatar: sessionStorage.getItem("avatar"),
+  };
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    setLoadingLogout(true);
+    sessionStorage.clear();
+    toast.info("Çıkış yapıldı, lütfen bekleyin...");
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
   };
 
   const notifications = [
@@ -181,13 +193,15 @@ const Navbar: React.FC = () => {
                     Hesap Ayarları
                   </a>
                   <hr className="border-gray-700 my-2" />
-                  <a
-                    href="/logout"
-                    className="flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors duration-200"
+                  {/* Logout Butonu */}
+                  <button
+                    onClick={handleLogout}
+                    disabled={loadingLogout}
+                    className="flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors duration-200 w-full"
                   >
                     <IoLogOut className="mr-3" />
-                    Çıkış Yap
-                  </a>
+                    {loadingLogout ? "Çıkış yapılıyor..." : "Çıkış Yap"}
+                  </button>
                 </div>
               </div>
             )}

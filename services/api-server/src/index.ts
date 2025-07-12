@@ -29,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+      "https://automation-system-template.vercel.app", // Vercel deployment
       "http://localhost:3000", // React development server
       "http://localhost:5173", // Vite development server
       "http://localhost:3001", // Alternatif React port
@@ -48,7 +49,6 @@ app.options("*", cors());
 // Static files
 app.use("/public", express.static(path.join(__dirname, "../public")));
 
-// Health check endpoint (middleware gerektirmez)
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,

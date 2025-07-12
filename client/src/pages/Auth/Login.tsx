@@ -7,6 +7,7 @@ import {
 } from "react-icons/ai";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { toast } from "react-toastify";
+import ServerError from "../errors/ServerError";
 
 interface InputFieldProps {
   icon: React.ComponentType<{ className?: string; size?: number }>;
@@ -102,8 +103,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState("");
+  const [hasServerError, setHasServerError] = useState(false);
 
   const handleSubmit = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 10000); // 10 saniye timeout
     setIsLoading(true);
 
     // Temel validasyonlar
@@ -134,7 +140,9 @@ const Login = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestData),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId); // Başarılı istek sonrası timeout'u temizle
 
       const responseData = await res.json();
       console.log("Login response:", responseData);
@@ -157,12 +165,6 @@ const Login = () => {
 
       if (res.status === 400) {
         toast.error(responseData.message || "Geçersiz istek.");
-        setIsLoading(false);
-        return;
-      }
-
-      if (res.status === 500) {
-        toast.error(responseData.message || "Sunucu hatası oluştu.");
         setIsLoading(false);
         return;
       }
@@ -216,19 +218,10 @@ const Login = () => {
         console.error("Login failed:", responseData);
       }
     } catch (error: any) {
-      console.error("Giriş hatası:", error);
-
-      // Network veya diğer hatalar için detaylı error handling
-      if (error.name === "TypeError" && error.message.includes("fetch")) {
-        toast.error(
-          "Sunucuya bağlanılamıyor. Lütfen sunucunun çalıştığından emin olun."
-        );
-      } else if (error.name === "SyntaxError") {
-        toast.error("Sunucudan geçersiz yanıt alındı.");
-      } else {
-        toast.error("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+      if (error.name === "AbortError") {
+        setHasServerError(true);
+        return;
       }
-
       // Geliştirme ortamında detaylı hata bilgisi
       if (process.env.NODE_ENV === "development") {
         console.error("Detailed error:", {
@@ -241,6 +234,10 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  if (hasServerError) {
+    return <ServerError />;
+  }
 
   return (
     <section id="login" className="flex min-h-screen">

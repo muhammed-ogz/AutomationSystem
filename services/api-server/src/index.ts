@@ -29,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+      "https://automation-system-template.vercel.app", // Vercel deployment
       "http://localhost:3000", // React development server
       "http://localhost:5173", // Vite development server
       "http://localhost:3001", // Alternatif React port
